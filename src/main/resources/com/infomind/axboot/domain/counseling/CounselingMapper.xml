@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.counseling.CounselingMapper">
+
+    <select id="getCounList" parameterType="hashmap" resultType="com.infomind.axboot.domain.classDtl.ClassDtl">
+        SELECT ST.*
+             , AT.M_CNT
+             , AT.S_CNT
+        FROM (
+                SELECT A.SEME_YEAR
+                     , A.SEME_SEQ
+                     , A.PERIOD_CD
+                     , A.CLAS_SEQ
+                     , A.STDT_ID
+                     , B.KOR AS STDT_NM_KOR
+                     , B.ENG AS STDT_NM_ENG
+                     , FN_CODE_NM('NATN_CD', C.NATN_CD) AS NATN_NM
+                     , C.BIRTH_DT
+                     , DATE_FORMAT(C.BIRTH_DT, '%Y.%m') AS BIRTH_MT
+                     , FN_CODE_NM('GENDER', C.GENDER) AS GENDER_NM
+                FROM JNU_CLAS_DTL A
+                    LEFT JOIN JNU_STDT C
+                        ON A.STDT_ID = C.STDT_ID
+                    LEFT JOIN JNU_LANG_PACK B
+                        ON C.STDT_NM = B.LANG_KEY
+                WHERE 1 = 1
+                  AND A.SEME_YEAR = #{schSemeYear}
+                  AND A.SEME_SEQ = #{schSemeSeq}
+                  AND A.PERIOD_CD = #{schPeriodCd}
+                  AND A.CLAS_SEQ = #{schClasSeq}
+                  AND A.STATUS_CD = '0'
+        ) ST
+        LEFT OUTER JOIN (
+                        SELECT AT.SEME_YEAR
+                             , AT.SEME_SEQ
+                             , AT.PERIOD_CD
+                             , AT.CLAS_SEQ
+                             , AT.STDT_ID
+                             , SUM(IF(SC.TCHR_HOUR != 0 AND M_ATDC_CNT = 0 AND IFNULL(CO.M_CO_CNT, 0) = 0, 1, 0)) AS M_CNT /* 출결면담시수가 존재하고 출석이 0이고 출결면담이 0이면 */
+                             , SUM(IF(SC.SUB_TCHR_HOUR != 0 AND S_ATDC_CNT = 0 AND IFNULL(CO.S_CO_CNT,0) = 0, 1, 0)) AS S_CNT
+                        FROM (
+                                SELECT AM.SEME_YEAR
+                                     , AM.SEME_SEQ
+                                     , AM.PERIOD_CD
+                                     , AM.CLAS_SEQ
+                                     , AM.ATDC_DT
+                                     , AD.STDT_ID
+                                     , SUM(IF(AM.TCHR_DIV = 'M' AND AD.ATDC_CD IN ('0', '1'), 1, 0)) AS M_ATDC_CNT
+                                     , SUM(IF(AM.TCHR_DIV = 'M' AND AD.ATDC_CD = '2', 1, 0)) AS M_ABSC_CNT
+                                     , SUM(IF(AM.TCHR_DIV = 'S' AND AD.ATDC_CD IN ('0', '1'), 1, 0)) AS S_ATDC_CNT
+                                     , SUM(IF(AM.TCHR_DIV = 'S' AND AD.ATDC_CD = '2', 1, 0)) AS S_ABSC_CNT
+                                FROM jnu_atdc_mst AM
+                                   , jnu_atdc_dtl AD
+                                WHERE AM.SEME_YEAR = AD.SEME_YEAR
+                                  AND AM.SEME_SEQ  = AD.SEME_SEQ
+                                  AND AM.PERIOD_CD = AD.PERIOD_CD
+                                  AND AM.CLAS_SEQ  = AD.CLAS_SEQ
+                                  AND AM.ATDC_DT   = AD.ATDC_DT
+                                  AND AM.ATDC_SEQ  = AD.ATDC_SEQ
+                                  AND AM.SEME_YEAR = #{schSemeYear}
+                                  AND AM.SEME_SEQ  = #{schSemeSeq}
+                                  AND AM.PERIOD_CD = #{schPeriodCd}
+                                  AND AM.CLAS_SEQ = #{schClasSeq}
+                                GROUP BY AM.SEME_YEAR
+                                       , AM.SEME_SEQ
+                                       , AM.PERIOD_CD
+                                       , AM.CLAS_SEQ
+                                       , AM.ATDC_DT
+                                       , AD.STDT_ID
+                        ) AT
+                        LEFT JOIN
+                             ( SELECT  co.COUN_DT
+                                    , co.SEME_YEAR
+                                    , co.SEME_SEQ
+                                    , co.PERIOD_CD
+                                    , co.CLAS_SEQ
+                                    , co.STDT_ID
+                                    , SUM(IF(CO.CREATED_BY = CM.TCHR_CD, 1, 0)) AS M_CO_CNT
+                                    , SUM(IF(CO.CREATED_BY = CM.SUB_TCHR_CD, 1, 0)) AS S_CO_CNT
+                               FROM jnu_coun co
+                                  , jnu_clas_mst cm
+                               WHERE co.SEME_YEAR = #{schSemeYear}
+                                 AND co.SEME_SEQ  = #{schSemeSeq}
+                                 AND co.PERIOD_CD = #{schPeriodCd}
+                                 AND co.CLAS_SEQ  = #{schClasSeq}
+                                 AND co.COUN_CD   = 'A'
+                                 AND co.DEL_YN    = 'N'
+                                 AND co.SEME_YEAR = cm.SEME_YEAR
+                                 AND co.SEME_SEQ  = cm.SEME_SEQ
+                                 AND co.PERIOD_CD = cm.PERIOD_CD
+                                 AND co.CLAS_SEQ  = cm.CLAS_SEQ
+                               GROUP BY co.COUN_DT , co.SEME_YEAR , co.SEME_SEQ , co.PERIOD_CD , co.CLAS_SEQ , co.STDT_ID
+                             ) CO
+                             ON     CO.SEME_YEAR = AT.SEME_YEAR
+                             AND    CO.SEME_SEQ  = AT.SEME_SEQ
+                             AND    CO.PERIOD_CD = AT.PERIOD_CD
+                             AND    CO.CLAS_SEQ  = AT.CLAS_SEQ
+                             AND    CO.COUN_DT   = AT.ATDC_DT
+                             AND    CO.STDT_ID   = AT.STDT_ID
+                        LEFT JOIN (
+                                    SELECT A.*
+                                         , CM.DATA1 AS TCHR_HOUR
+                                         , CM.DATA2 AS SUB_TCHR_HOUR
+                                    FROM (
+                                            SELECT SE.SEME_YEAR
+                                                 , SE.SEME_SEQ
+                                                 , DT.DT
+                                                 , SC.SCHE_NM
+                                                 , IF(IFNULL(SC.WEEK_CD, '') = '', CASE DT.DAY_OF_WEEK
+                                                                                   WHEN '2' THEN MON_CD
+                                                                                   WHEN '3' THEN TUE_CD
+                                                                                   WHEN '4' THEN WED_CD
+                                                                                   WHEN '5' THEN THU_CD
+                                                                                   WHEN '6' THEN FRI_CD
+                                                                                    END, SC.WEEK_CD) AS WEEK_CD
+                                            FROM jnu_seme SE
+                                               , jnu_date DT
+                                                   LEFT JOIN jnu_sche SC
+                                                       ON SC.SCHE_DT = DT.DT
+                                                       AND SC.SEME_YEAR = #{schSemeYear}
+                                                       AND SC.SEME_SEQ = #{schSemeSeq}
+                                            WHERE SE.SEME_YEAR = #{schSemeYear}
+                                              AND SE.SEME_SEQ = #{schSemeSeq}
+                                              AND DT.DT BETWEEN SE.START_DT AND END_DT
+                                              AND NOT EXISTS (SELECT 1
+                                                                FROM jnu_sche
+                                                               WHERE SEME_YEAR = SE.SEME_YEAR
+                                                                 AND SEME_SEQ = SE.SEME_SEQ
+                                                                 AND SCHE_DT = DT.DT
+                                                                 AND (HOLI_YN = 'Y' OR COUN_YN = 'N'))
+                                    ) A
+                                    LEFT JOIN common_code_m CM
+                                        ON CM.GROUP_CD = 'WEEK_CD'
+                                        AND CM.CODE = A.WEEK_CD
+                                    WHERE A.WEEK_CD IS NOT NULL
+                        ) SC
+                        ON AT.SEME_YEAR = SC.SEME_YEAR
+                        AND AT.SEME_SEQ = SC.SEME_SEQ
+                        AND AT.ATDC_DT = SC.DT
+                        GROUP BY AT.SEME_YEAR
+                               , AT.SEME_SEQ
+                               , AT.PERIOD_CD
+                               , AT.CLAS_SEQ
+                               , AT.STDT_ID
+        ) AT
+        ON ST.SEME_YEAR = AT.SEME_YEAR
+        AND ST.SEME_SEQ = AT.SEME_SEQ
+        AND ST.PERIOD_CD = AT.PERIOD_CD
+        AND ST.CLAS_SEQ = AT.CLAS_SEQ
+        AND ST.STDT_ID = AT.STDT_ID
+        ORDER BY STDT_NM_KOR
+    </select>
+
+    <select id="getStudentCounList" parameterType="hashmap" resultType="com.infomind.axboot.domain.counseling.Counseling">
+        SELECT
+            A.COUN_SEQ,
+            A.COUN_DT,
+            A.SEME_YEAR,
+            A.SEME_SEQ,
+            A.PERIOD_CD,
+            A.CLAS_SEQ,
+            A.STDT_ID,
+            A.COUN_CD,
+            FN_CODE_NM('COUN_CD',A.COUN_CD) AS COUN_NM,
+            A.CONTENTS,
+            A.OPEN_YN,
+            A.DEL_YN,
+            A.CREATED_AT,
+            A.CREATED_BY,
+            FN_USER_NM(A.CREATED_BY) AS CREATED_BY_NM,
+            A.UPDATED_AT,
+            A.UPDATED_BY
+        FROM JNU_COUN A
+        WHERE 1=1
+        <if test='!semeYear.equals("")'>
+            AND A.SEME_YEAR =  #{semeYear}
+        </if>
+        <if test='!semeSeq.equals("")'>
+            AND A.SEME_SEQ =  #{semeSeq}
+        </if>
+        <if test='!periodCd.equals("")'>
+            AND A.PERIOD_CD =  #{periodCd}
+        </if>
+        <if test='!clasSeq.equals("")'>
+            AND A.CLAS_SEQ =  #{clasSeq}
+        </if>
+        <if test='!stdtId.equals("")'>
+            AND A.STDT_ID =  #{stdtId}
+        </if>
+        <if test='!openYn.equals("")'>
+            AND A.OPEN_YN =  #{openYn}
+        </if>
+            AND A.DEL_YN =  'N'
+        ORDER BY A.COUN_DT DESC
+    </select>
+
+    <update id="deleteCoun" parameterType="com.infomind.axboot.domain.counseling.Counseling" >
+        UPDATE JNU_COUN SET
+            DEL_YN = 'Y',
+            UPDATED_AT = now(),
+            UPDATED_BY = #{updatedBy}
+        WHERE
+          COUN_SEQ = #{counSeq}
+    </update>
+
+
+    <select id="tchrCounExcel" parameterType="hashmap" resultType="com.infomind.axboot.domain.counseling.CounselingExcel">
+        SELECT U.USER_CD
+             , U.USER_NM
+             , U.CLAS_NM
+             , U.TCHR_DIV
+             , U.STDT_ID
+             , FN_GET_LANG('KOR', U.STDT_NM) AS STDT_NM_KOR
+             , IFNULL(CO.GEN_CNT, 0) AS GEN_CNT -- 일반상담건수
+             , IFNULL(CO.INDI_CNT, 0) AS INDI_CNT -- 개별지도건수
+             , IFNULL(CO.ATDC_CNT, 0) AS ATDC_CNT -- 출결상담건수
+             , IF(TCHR_DIV = '담임', AT.M_CNT, AT.S_CNT) AS ABSC_CNT -- 출결누락건수
+             , IF(TCHR_DIV = '담임', AT.M_ABSC_DT, AT.S_ABSC_DT) AS ABSC_DT -- 출결누락일자
+        FROM (SELECT CM.SEME_YEAR
+                   , CM.SEME_SEQ
+                   , CM.PERIOD_CD
+                   , CM.CLAS_SEQ
+                   , CM.CLAS_NM
+                   , IF(U.USER_CD = CM.TCHR_CD, '담임', '부담임') AS TCHR_DIV
+                   , U.USER_CD
+                   , U.USER_NM
+                   , CD.STDT_ID
+                   , ST.STDT_NM
+              FROM user_m U
+                 , jnu_clas_mst CM
+                 , jnu_clas_dtl CD
+                 , jnu_stdt ST
+              WHERE CM.SEME_YEAR = #{schSemeYear}
+                AND CM.SEME_SEQ = #{schSemeSeq}
+                AND CM.PERIOD_CD = #{schPeriodCd}
+                AND CM.SEME_YEAR = CD.SEME_YEAR
+                AND CM.SEME_SEQ = CD.SEME_SEQ
+                AND CM.PERIOD_CD = CD.PERIOD_CD
+                AND CM.CLAS_SEQ = CD.CLAS_SEQ
+                AND CD.STATUS_CD = '0'
+                AND CD.STDT_ID = ST.STDT_ID
+                AND U.USER_CD IN ( CM.TCHR_CD, CM.SUB_TCHR_CD)
+             ) U
+             LEFT JOIN
+             ( SELECT CO.SEME_YEAR
+                    , CO.SEME_SEQ
+                    , CO.PERIOD_CD
+                    , CO.CLAS_SEQ
+                    , CO.STDT_ID
+                    , CO.CREATED_BY
+                    , SUM(IF(CO.COUN_CD = 'A', 1, 0)) AS ATDC_CNT
+                    , SUM(IF(CO.COUN_CD = 'G', 1, 0)) AS GEN_CNT
+                    , SUM(IF(CO.COUN_CD = 'I', 1, 0)) AS INDI_CNT
+               FROM jnu_coun CO
+               WHERE CO.SEME_YEAR = #{schSemeYear}
+                 AND CO.SEME_SEQ = #{schSemeSeq}
+                 AND CO.PERIOD_CD = #{schPeriodCd}
+               GROUP BY CO.SEME_YEAR
+                      , CO.SEME_SEQ
+                      , CO.PERIOD_CD
+                      , CO.CLAS_SEQ
+                      , CO.STDT_ID
+                      , CO.CREATED_BY
+             ) CO
+             ON U.SEME_YEAR = CO.SEME_YEAR
+                 AND U.SEME_SEQ = CO.SEME_SEQ
+                 AND U.PERIOD_CD = CO.PERIOD_CD
+                 AND U.CLAS_SEQ = CO.CLAS_SEQ
+                 AND U.STDT_ID = CO.STDT_ID
+                 AND U.USER_CD = CO.CREATED_BY
+                 LEFT JOIN
+             ( SELECT AT.SEME_YEAR
+                    , AT.SEME_SEQ
+                    , AT.PERIOD_CD
+                    , AT.CLAS_SEQ
+                    , AT.STDT_ID
+                    , SUM(IF(SC.TCHR_HOUR != 0 AND M_ATDC_CNT = 0 AND IFNULL(CO.M_CO_CNT, 0) = 0, 1, 0)) AS M_CNT /* 출결면담시수가 존재하고 출석이 0이고 출결면담이 0이면 */
+                    , SUM(IF(SC.SUB_TCHR_HOUR != 0 AND S_ATDC_CNT = 0 AND IFNULL(CO.S_CO_CNT,0) = 0, 1, 0)) AS S_CNT
+                    , GROUP_CONCAT(IF(SC.TCHR_HOUR != 0 AND M_ATDC_CNT = 0 AND IFNULL(CO.M_CO_CNT, 0) = 0, AT.ATDC_DT, NULL) SEPARATOR ', ') AS M_ABSC_DT
+                    , GROUP_CONCAT(IF(SC.SUB_TCHR_HOUR != 0 AND S_ATDC_CNT = 0 AND IFNULL(CO.S_CO_CNT,0) = 0, AT.ATDC_DT, NULL) SEPARATOR ', ') AS S_ABSC_DT
+               FROM ( SELECT AM.SEME_YEAR
+                           , AM.SEME_SEQ
+                           , AM.PERIOD_CD
+                           , AM.CLAS_SEQ
+                           , AM.ATDC_DT
+                           , AD.STDT_ID
+                           , SUM(IF(AM.TCHR_DIV = 'M' AND AD.ATDC_CD IN ('0','1'), 1, 0)) AS M_ATDC_CNT -- 강사별 수업에 모두 결석인 경우만 출결면담 작성하므로 지각도 출석으로 인정
+                           , SUM(IF(AM.TCHR_DIV = 'M' AND AD.ATDC_CD = '2', 1, 0)) AS M_ABSC_CNT
+                           , SUM(IF(AM.TCHR_DIV = 'S' AND AD.ATDC_CD IN ('0','1'), 1, 0)) AS S_ATDC_CNT
+                           , SUM(IF(AM.TCHR_DIV = 'S' AND AD.ATDC_CD = '2', 1, 0)) AS S_ABSC_CNT
+                      FROM jnu_atdc_mst AM
+                         , jnu_atdc_dtl AD
+                      WHERE AM.SEME_YEAR = AD.SEME_YEAR
+                        AND AM.SEME_SEQ = AD.SEME_SEQ
+                        AND AM.PERIOD_CD = AD.PERIOD_CD
+                        AND AM.CLAS_SEQ = AD.CLAS_SEQ
+                        AND AM.ATDC_DT = AD.ATDC_DT
+                        AND AM.ATDC_SEQ = AD.ATDC_SEQ
+                        AND AM.SEME_YEAR = #{schSemeYear}
+                        AND AM.SEME_SEQ = #{schSemeSeq}
+                        AND AM.PERIOD_CD = #{schPeriodCd}
+                      GROUP BY AM.SEME_YEAR
+                             , AM.SEME_SEQ
+                             , AM.PERIOD_CD
+                             , AM.CLAS_SEQ
+                             , AM.ATDC_DT
+                             , AD.STDT_ID
+                    ) AT
+                        LEFT JOIN
+                    ( SELECT  co.COUN_DT
+                           , co.SEME_YEAR
+                           , co.SEME_SEQ
+                           , co.PERIOD_CD
+                           , co.CLAS_SEQ
+                           , co.STDT_ID
+                           , SUM(IF(CO.CREATED_BY = CM.TCHR_CD, 1, 0)) AS M_CO_CNT
+                           , SUM(IF(CO.CREATED_BY = CM.SUB_TCHR_CD, 1, 0)) AS S_CO_CNT
+                      FROM jnu_coun co
+                         , jnu_clas_mst cm
+                      WHERE co.SEME_YEAR = #{schSemeYear}
+                        AND co.SEME_SEQ  = #{schSemeSeq}
+                        AND co.PERIOD_CD = #{schPeriodCd}
+                        AND co.COUN_CD   = 'A'
+                        AND co.DEL_YN    = 'N'
+                        AND co.SEME_YEAR = cm.SEME_YEAR
+                        AND co.SEME_SEQ  = cm.SEME_SEQ
+                        AND co.PERIOD_CD = cm.PERIOD_CD
+                        AND co.CLAS_SEQ  = cm.CLAS_SEQ
+                      GROUP BY co.COUN_DT , co.SEME_YEAR , co.SEME_SEQ , co.PERIOD_CD , co.CLAS_SEQ , co.STDT_ID
+                    ) CO
+                    ON     CO.SEME_YEAR = AT.SEME_YEAR
+                    AND    CO.SEME_SEQ  = AT.SEME_SEQ
+                    AND    CO.PERIOD_CD = AT.PERIOD_CD
+                    AND    CO.CLAS_SEQ  = AT.CLAS_SEQ
+                    AND    CO.COUN_DT   = AT.ATDC_DT
+                    AND    CO.STDT_ID   = AT.STDT_ID
+                        LEFT JOIN
+                    (SELECT A.*
+                          , CM.DATA1 AS TCHR_HOUR
+                          , CM.DATA2 AS SUB_TCHR_HOUR
+                     FROM (SELECT SE.SEME_YEAR
+                                , SE.SEME_SEQ
+                                , DT.DT
+                                , SC.SCHE_NM
+                                , IF(IFNULL(SC.WEEK_CD, '') = '', CASE DT.DAY_OF_WEEK
+                                                                  WHEN '2' THEN MON_CD
+                                                                  WHEN '3' THEN TUE_CD
+                                                                  WHEN '4' THEN WED_CD
+                                                                  WHEN '5' THEN THU_CD
+                                                                  WHEN '6' THEN FRI_CD
+                                                                  END, SC.WEEK_CD) AS WEEK_CD
+                           FROM jnu_seme SE
+                              , jnu_date DT
+                                    LEFT JOIN jnu_sche SC
+                                              ON SC.SCHE_DT = DT.DT
+                                              AND SC.SEME_YEAR = #{schSemeYear}
+                                              AND SC.SEME_SEQ = #{schSemeSeq}
+                           WHERE SE.SEME_YEAR = #{schSemeYear}
+                             AND SE.SEME_SEQ = #{schSemeSeq}
+                             AND DT.DT BETWEEN SE.START_DT AND END_DT
+                             AND NOT EXISTS
+                               (SELECT 1
+                                FROM jnu_sche
+                                WHERE SEME_YEAR = SE.SEME_YEAR
+                                  AND SEME_SEQ = SE.SEME_SEQ
+                                  AND SCHE_DT = DT.DT
+                                  AND (HOLI_YN = 'Y' OR COUN_YN = 'N')
+                               )
+                          ) A
+                              LEFT JOIN common_code_m CM
+                                    ON CM.GROUP_CD = 'WEEK_CD'
+                                    AND CM.CODE = A.WEEK_CD
+                            WHERE A.WEEK_CD IS NOT NULL
+                    ) SC
+                    ON AT.SEME_YEAR = SC.SEME_YEAR
+                    AND AT.SEME_SEQ = SC.SEME_SEQ
+                    AND AT.ATDC_DT = SC.DT
+               GROUP BY AT.SEME_YEAR
+                      , AT.SEME_SEQ
+                      , AT.PERIOD_CD
+                      , AT.CLAS_SEQ
+                      , AT.STDT_ID
+             ) AT
+             ON U.SEME_YEAR = AT.SEME_YEAR
+             AND U.SEME_SEQ = AT.SEME_SEQ
+             AND U.PERIOD_CD = AT.PERIOD_CD
+             AND U.CLAS_SEQ = AT.CLAS_SEQ
+             AND U.STDT_ID = AT.STDT_ID
+    </select>
+
+</mapper>

@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="JNU_User_Report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="60206a4c-9ffd-4c3f-8175-147cbc7a2b61">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Table 2_TH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 2_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 2_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="transList" uuid="49ee01d3-d93b-4e4f-a97e-c94f4ab3be8a">
+		<queryString>
+			<![CDATA[]]>
+		</queryString>
+		<field name="lv" class="java.lang.String"/>
+		<field name="examScorS" class="java.lang.String"/>
+		<field name="examScorW" class="java.lang.String"/>
+		<field name="examScorL" class="java.lang.String"/>
+		<field name="examScorR" class="java.lang.String"/>
+		<field name="totHours" class="java.lang.String"/>
+		<field name="atdcRate" class="java.lang.String"/>
+		<field name="atdc" class="java.lang.String"/>
+		<field name="scoreTitleKor" class="java.lang.String"/>
+		<field name="scoreTitleEng" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="imagePath" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="stdtNmEng" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="stdtNmKor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="natnNm" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NAME"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="student_sample"/>
+	</field>
+	<field name="birthDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="stdtId" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="startDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="endDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="printDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="printDt"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="totHours" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="stdtNmKor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="docSeq" class="java.lang.String"/>
+	<field name="during" class="java.lang.String"/>
+	<field name="printYear" class="java.lang.String"/>
+	<field name="printDtKor" class="java.lang.String"/>
+	<field name="startDtKor" class="java.lang.String"/>
+	<field name="startDtEng" class="java.lang.String"/>
+	<field name="endDtKor" class="java.lang.String"/>
+	<field name="endDtEng" class="java.lang.String"/>
+	<field name="printDtEng" class="java.lang.String"/>
+	<field name="transDataSource" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<pageHeader>
+		<band height="509">
+			<textField>
+				<reportElement x="0" y="22" width="300" height="20" uuid="d145b0c8-5d60-4391-998b-add501a3f7cf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b288738d-02c2-4302-8161-5c7f0e7487c2"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA["제"+$F{printYear}+" - "+$F{docSeq}+"호"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="54" width="555" height="40" uuid="8cefe611-cee7-48ef-a0fa-47026bf41300"/>
+				<textElement textAlignment="Center">
+					<font fontName="georgia" size="30" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["JEJU NATIONAL UNIVERSITY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="94" width="555" height="20" uuid="108a9d3f-4613-417e-b85e-b09308703d56"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="10" isBold="true"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["102 Jejudaehakno, Jeju-si, Jeju Special Self-Governing Province, Korea, 63243"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="114" width="555" height="20" uuid="01c843bf-8bbc-49e9-92f8-ae6f7cd707f1"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="14" isBold="true"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Center for International Affairs"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="62" y="162" width="430" height="38" uuid="c03fa7ae-cd9d-4599-b9c8-5a27a7a2af45"/>
+				<textElement textAlignment="Center">
+					<font fontName="함초롬바탕" size="28" isBold="true"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["성 적 증 명 서"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="62" y="200" width="430" height="38" uuid="682cf64a-d2bb-427e-90bd-f675481be7c1"/>
+				<textElement textAlignment="Center">
+					<font fontName="함초롬바탕" size="22" isBold="true"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TRANSCRIPT"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="75" y="273" width="150" height="30" uuid="40d35c5b-4a3a-4a8e-a9b2-4d54a58f9ce1"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[성      명 (Name) :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="75" y="303" width="202" height="30" uuid="50f5988e-8ed2-483b-9cbc-dd7e5e412f5c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="16" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[생년월일 (Date of Birth) : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="75" y="331" width="190" height="30" uuid="36e140fe-a676-433d-a611-397f6427dea1"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[국      적 (Nationality) : ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="228" y="273" width="312" height="30" uuid="92b01e19-595c-4b4c-a848-5c6a1d844a57">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b288738d-02c2-4302-8161-5c7f0e7487c2"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{stdtNmEng}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="283" y="303" width="190" height="28" uuid="4318c5a2-4e81-46fd-bcd2-42dfb0fa3a7d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0a3f5bdd-a1f4-4257-83e6-008e27b5cbcd"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{birthDt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="271" y="331" width="190" height="30" uuid="5553c24f-b85d-4f76-af43-1a83ba8225dc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9847aab6-8ba8-464a-8949-45eb6cd57c18"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{natnNm}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="62" y="382" width="438" height="60" uuid="e7760c68-f7aa-4530-b085-65e52d158333">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="450a938d-f8c1-408f-9087-dae0718f9b64"/>
+				</reportElement>
+				<textElement textAlignment="Justified" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="14" isBold="false"/>
+					<paragraph lineSpacing="Fixed" lineSpacingSize="17.0"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" 위 사람은 "+$F{startDtKor}+"부터 "+$F{endDtKor}+"까지 제주대학교  국제교류본부에서 제공하는 한국어과정에서 다음과 같은 성적을 취득   하였음을 증명합니다."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="62" y="446" width="438" height="60" uuid="c90f319c-5bdd-482d-84b6-0ca8b61a0e2a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="450a938d-f8c1-408f-9087-dae0718f9b64"/>
+				</reportElement>
+				<textElement textAlignment="Justified" verticalAlignment="Middle">
+					<font fontName="Calisto MT" size="13" isBold="false" isItalic="true"/>
+					<paragraph lineSpacing="Fixed" lineSpacingSize="17.0"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" The Center for International Affairs of Jeju National University certifies that the above person has obtained the following scores during the duration of the Korean Language Program, from "+$F{startDtEng}+" to "+$F{endDtEng}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="106" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<componentElement>
+				<reportElement x="62" y="9" width="448" height="60" uuid="002dc35b-00f1-4ea2-82ee-513e7dd52d2f">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table 2_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table 2_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table 2_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="transList" uuid="eb600016-406f-4d2a-95a5-8dcc15442b41">
+						<dataSourceExpression><![CDATA[$F{transDataSource}]]></dataSourceExpression>
+					</datasetRun>
+					<jr:column width="70" uuid="9e18d9d5-520e-4386-bd48-431f22fa08b4">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+						<jr:columnHeader style="Table 2_CH" height="30" rowSpan="1">
+							<box>
+								<topPen lineWidth="1.5"/>
+								<leftPen lineWidth="1.5"/>
+								<bottomPen lineWidth="1.25" lineStyle="Solid"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="70" height="15" uuid="8a3f2492-3189-4f52-8c45-8af9673b26de"/>
+								<box>
+									<bottomPen lineWidth="0.0"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<text><![CDATA[구분]]></text>
+							</staticText>
+							<staticText>
+								<reportElement x="0" y="15" width="70" height="15" uuid="2a1c8c00-f487-4d8b-8c78-46d66475e42e"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Type]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 2_TD" height="30">
+							<box>
+								<topPen lineWidth="0.0"/>
+								<leftPen lineWidth="1.5"/>
+								<bottomPen lineWidth="1.5"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<textField>
+								<reportElement x="0" y="0" width="70" height="15" uuid="74bf4b73-96a8-448b-a973-c91693ad6fec"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{scoreTitleKor}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement x="0" y="15" width="70" height="15" uuid="e7dcfc21-b84c-4853-b85c-cf13514d8c9c"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{scoreTitleEng}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="60" uuid="8a8758ba-6b49-4c88-9e20-bf5babaacf6c">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:columnHeader style="Table 2_CH" height="30" rowSpan="1">
+							<box>
+								<topPen lineWidth="1.5"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.25" lineStyle="Solid"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="15" uuid="5f6f5b1f-ab98-4015-a3e5-535935bade48"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<text><![CDATA[말하기]]></text>
+							</staticText>
+							<staticText>
+								<reportElement x="0" y="15" width="60" height="15" uuid="0309940d-a74d-41f4-8192-43002372f02e"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Speaking]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 2_TD" height="30">
+							<box>
+								<topPen lineWidth="0.0"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.5"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<textField>
+								<reportElement x="0" y="0" width="60" height="30" uuid="9b402b8b-73ee-42a9-b8e4-f1aa19c640ec"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{examScorS}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="60" uuid="e26c9e74-d493-475a-a94c-848e64ccea7e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+						<jr:columnHeader style="Table 2_CH" height="30" rowSpan="1">
+							<box>
+								<topPen lineWidth="1.5"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.25" lineStyle="Solid"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="15" uuid="3491ea25-a8b9-400e-a6aa-d8511cc56619"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<text><![CDATA[쓰기]]></text>
+							</staticText>
+							<staticText>
+								<reportElement x="0" y="15" width="60" height="15" uuid="66d7876b-55b3-4063-bda6-8d7ebd5a43cc"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Writing]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 2_TD" height="30">
+							<box>
+								<topPen lineWidth="0.0"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.5"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<textField>
+								<reportElement x="0" y="0" width="60" height="30" uuid="91d781c4-9e62-497f-bbc7-ea00ba351005"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{examScorW}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="60" uuid="180c69e4-bd38-46dc-abf1-0b4e2ed8a848">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:columnHeader style="Table 2_CH" height="30" rowSpan="1">
+							<box>
+								<topPen lineWidth="1.5"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.25" lineStyle="Solid"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="15" uuid="9be19075-064f-4aea-84cf-be1ff77aafc5"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<text><![CDATA[듣기]]></text>
+							</staticText>
+							<staticText>
+								<reportElement x="0" y="15" width="60" height="15" uuid="ed0a2d8e-c197-4324-b664-062611c35060"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Listening]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 2_TD" height="30">
+							<box>
+								<topPen lineWidth="0.0"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.5"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<textField>
+								<reportElement x="0" y="0" width="60" height="30" uuid="f753eb9a-ac17-4b66-a49e-d57723cd7f6c"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{examScorL}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="60" uuid="2b62e73c-31e9-4018-92c0-022b983c61d8">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+						<jr:columnHeader style="Table 2_CH" height="30" rowSpan="1">
+							<box>
+								<topPen lineWidth="1.5"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.25" lineStyle="Solid"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="15" uuid="0f602219-98dc-4ff6-90b3-832afceb33c9"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<text><![CDATA[읽기]]></text>
+							</staticText>
+							<staticText>
+								<reportElement x="0" y="15" width="60" height="15" uuid="d765ecae-6cd5-4d95-b7c5-b172bd3acc1e"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Reading]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 2_TD" height="30">
+							<box>
+								<topPen lineWidth="0.0"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.5"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<textField>
+								<reportElement x="0" y="0" width="60" height="30" uuid="f72b7328-abc6-45b7-b556-21c6907f5e43"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{examScorR}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="b472daf6-458c-41f7-828d-6a63920b7014">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+						<jr:columnHeader style="Table 2_CH" height="30" rowSpan="1">
+							<box>
+								<topPen lineWidth="1.5"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.25" lineStyle="Solid"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="15" uuid="daffdd8c-2c1b-4549-a755-abeef2ffc164"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<text><![CDATA[출석률]]></text>
+							</staticText>
+							<staticText>
+								<reportElement x="0" y="15" width="80" height="15" uuid="b93e57e1-d7ca-49e5-b0dc-a8829e338ded"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Attendance Rate]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 2_TD" height="30">
+							<box>
+								<topPen lineWidth="0.0"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.5"/>
+								<rightPen lineWidth="1.0"/>
+							</box>
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="5ecaa402-a83f-48f1-8aa5-4f1972ef7ef5"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{atdc}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="50" uuid="c7349086-f881-4d3c-aa77-62fcd874c3df">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+						<jr:columnHeader style="Table 2_CH" height="30" rowSpan="1">
+							<box>
+								<topPen lineWidth="1.5"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.25" lineStyle="Solid"/>
+								<rightPen lineWidth="1.5"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="50" height="15" uuid="9deec015-b4b9-40bf-b609-0ad4e8e3c063"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<text><![CDATA[급수]]></text>
+							</staticText>
+							<staticText>
+								<reportElement x="0" y="15" width="50" height="15" uuid="0716c7f6-9b8d-4eef-83db-c1585098155a"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Level]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 2_TD" height="30">
+							<box>
+								<topPen lineWidth="0.0"/>
+								<leftPen lineWidth="1.0"/>
+								<bottomPen lineWidth="1.5"/>
+								<rightPen lineWidth="1.5"/>
+							</box>
+							<textField>
+								<reportElement x="0" y="0" width="50" height="30" uuid="0e6f56ce-85ee-4bba-b264-afd7af6bf69b"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="함초롬바탕"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{lv}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="77" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField pattern="YYYY년 MM월 dd일">
+				<reportElement x="180" y="39" width="200" height="30" uuid="5fb1e942-7e18-43d1-bc03-45870e91ab2c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{printDtKor}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="110" splitType="Stretch">
+			<image>
+				<reportElement x="420" y="4" width="90" height="90" uuid="c8d54739-8fe5-4df1-b610-90c24f4b61cc"/>
+				<imageExpression><![CDATA[$P{imagePath} + "sign.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="10" y="8" width="540" height="46" uuid="10f1e798-7fd9-4cb6-a0f1-8b148a8ea4d5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="24" isBold="true"/>
+				</textElement>
+				<text><![CDATA[제 주 대 학 교 국 제 교 류 본 부 장]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="56" width="540" height="20" uuid="7172e5eb-ef2d-4dfb-9c75-0de9ca4ee448"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Calisto" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Director of the Center for International Affairs Jeju NationalUniversity]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+</jasperReport>

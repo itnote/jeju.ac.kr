@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.scoreDtl.ScoreDtlMapper">
+
+    <select id="getScoreDtlList" parameterType="map" resultType="com.infomind.axboot.domain.scoreDtl.ScoreDtl">
+        SELECT A.*,
+               B.LV,
+               B.MID_RATIO,
+               B.FINAL_RATIO,
+               B.PASS_SCOR,
+               B.FAIL_SCOR,
+               B.FAIL_YN,
+               B.EVAL_RATIO
+        FROM
+            (SELECT A.*
+                  , IFNULL(SD.PERIOD_CD, #{schPeriodCd}) AS PERIOD_CD
+                  , IFNULL(SD.CLAS_SEQ, #{schClasSeq}) AS CLAS_SEQ
+                  , IFNULL(SD.STDT_ID, #{schStdtId}) AS STDT_ID
+                  , IFNULL(SD.SCOR, 0) AS SCOR
+                  , IFNULL(SD.PERF, 0) AS PERF
+                  , IFNULL(SD.SCOR, 0) + IFNULL(SD.PERF, 0) AS TOT_SCOR
+                  , SD.SCOR AS ORI_SCOR
+                  , SD.PERF AS ORI_PERF
+                  , SD.UPDATED_AT
+                  , FN_USER_NM(UPDATED_BY) AS UPDATED_BY_NM
+             FROM
+                 (SELECT SB.SEME_YEAR,
+                         SB.SEME_SEQ,
+                         SB.SBJT_ID,
+                         FN_GET_LANG('KOR', SB.SBJT_NM) AS SBJT_NM_KOR,
+                         COM.CODE AS EXAM_CD,
+                         COM.NAME AS EXAM_NM
+                  FROM jnu_sbjt SB,
+                       common_code_m COM
+                  WHERE COM.GROUP_CD = 'EXAM_CD'
+                    AND SB.SEME_YEAR = #{schSemeYear}
+                    AND SB.SEME_SEQ = #{schSemeSeq}
+                 ) A
+                     LEFT JOIN jnu_scor_dtl SD
+                               ON SD.SEME_YEAR = A.SEME_YEAR
+                               AND SD.SEME_SEQ = A.SEME_SEQ
+                               AND SD.SBJT_ID = A.SBJT_ID
+                               AND SD.EXAM_CD = A.EXAM_CD
+                               AND SD.PERIOD_CD =  #{schPeriodCd}
+                               AND SD.CLAS_SEQ =  #{schClasSeq}
+                               AND SD.STDT_ID = #{schStdtId}
+            ) A
+            LEFT JOIN
+            (SELECT em.SEME_YEAR ,
+                    em.SEME_SEQ ,
+                    em.LV ,
+                    em.MID_RATIO ,
+                    em.FINAL_RATIO ,
+                    em.PASS_SCOR ,
+                    em.FAIL_SCOR ,
+                    ed.SBJT_ID ,
+                    ed.EVAL_RATIO ,
+                    ed.FAIL_YN
+             FROM jnu_eval_mst em,
+                  jnu_eval_dtl ed
+             WHERE em.SEME_YEAR = ed.SEME_YEAR
+               AND em.SEME_SEQ = ed.SEME_SEQ
+               AND em.LV = ed.LV
+               AND em.SEME_YEAR = #{schSemeYear}
+               AND em.LV = #{schLv}
+            ) B
+            ON A.SEME_YEAR = B.SEME_YEAR
+                AND A.SBJT_ID = B.SBJT_ID
+        WHERE 1=1
+        ORDER BY A.EXAM_CD DESC, A.SBJT_ID
+    </select>
+
+</mapper>

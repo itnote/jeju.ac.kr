@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.scoreMst.ScoreMstMapper">
+
+    <select id="getStudentScoreList" parameterType="map" resultType="com.infomind.axboot.domain.scoreMst.ScoreMst">
+        SELECT CM.SEME_YEAR,
+                CM.SEME_SEQ,
+                CM.PERIOD_CD,
+                CM.CLAS_SEQ,
+                CD.STDT_ID,
+                FN_CODE_NM('NATN_CD', S.NATN_CD) AS NATN_NM,
+                FN_GET_LANG('KOR', S.STDT_NM) AS STDT_NM_KOR,
+                FN_GET_LANG('ENG', S.STDT_NM) AS STDT_NM_ENG,
+                FN_CODE_NM('GENDER', S.GENDER) AS GENDER_NM,
+                S.BIRTH_DT,
+                SM.TOT_SCOR,
+                FN_CODE_NM('SCOR_CD', SM.SCOR_CD) AS SCOR_NM,
+                CM.TCHR_CD,
+                CM.SUB_TCHR_CD,
+                CM.LV,
+                FN_CODE_NM('FAIL_RESN', SM.FAIL_RESN) AS FAIL_RESN
+        FROM jnu_clas_mst CM
+            , jnu_clas_dtl CD
+            LEFT JOIN jnu_scor_mst SM
+                    ON CD.SEME_YEAR = SM.SEME_YEAR
+                   AND CD.SEME_SEQ = SM.SEME_SEQ
+                   AND CD.PERIOD_CD = SM.PERIOD_CD
+                   AND CD.CLAS_SEQ = SM.CLAS_SEQ
+                   AND CD.STDT_ID = SM.STDT_ID
+            , jnu_stdt S
+        WHERE CM.SEME_YEAR = CD.SEME_YEAR
+        AND CM.SEME_SEQ = CD.SEME_SEQ
+        AND CM.PERIOD_CD = CD.PERIOD_CD
+        AND CM.CLAS_SEQ = CD.CLAS_SEQ
+        AND CD.STDT_ID = S.STDT_ID
+        AND CM.SEME_YEAR =  #{schSemeYear}
+        AND CM.SEME_SEQ =  #{schSemeSeq}
+        AND CM.PERIOD_CD =  #{schPeriodCd}
+        AND CM.CLAS_SEQ =  #{schClasSeq}
+        ORDER BY STDT_NM_KOR
+
+    </select>
+
+    <select id="getEvalResult" parameterType="com.infomind.axboot.domain.scoreMst.ScoreMst" resultType="com.infomind.axboot.domain.scoreMst.ScoreMst">
+        SELECT Z.SEME_YEAR,
+               Z.SEME_SEQ,
+               Z.PERIOD_CD,
+               Z.CLAS_SEQ,
+               Z.STDT_ID,
+               Z.LV,
+               CASE WHEN MIN(Z.MIN_EXAM) &lt; Z.FAIL_SCOR OR ROUND(SUM(Z.AVG_EXAM * (Z.EVAL_RATIO * 0.01)), 0) &lt; Z.PASS_SCOR
+                     THEN 'F'
+                     ELSE 'P' END AS SCOR_CD,
+               SUM(MID_AVG * (Z.EVAL_RATIO * 0.01)) AS MID_SCOR,
+               SUM(FIN_AVG * (Z.EVAL_RATIO * 0.01)) AS FIN_SCOR,
+               ROUND(SUM(Z.AVG_EXAM * (Z.EVAL_RATIO * 0.01)), 2) AS TOT_SCOR,
+               CASE WHEN MIN(Z.MIN_EXAM) &lt; Z.FAIL_SCOR
+                     THEN 'SUB'
+                    WHEN ROUND(SUM(Z.AVG_EXAM * (Z.EVAL_RATIO * 0.01)), 0) &lt; Z.PASS_SCOR
+                     THEN 'TOT'  END AS FAIL_RESN
+        FROM (
+                 SELECT Z.SEME_YEAR,
+                        Z.SEME_SEQ,
+                        Z.SBJT_ID,
+                        Z.PERIOD_CD,
+                        Z.CLAS_SEQ,
+                        Z.STDT_ID,
+                        Z.LV,
+                        Z.PASS_SCOR,
+                        Z.FAIL_SCOR,
+                        Z.FAIL_YN,
+                        Z.EVAL_RATIO,
+                        IF(Z.FAIL_YN='Y', ROUND(SUM(EXAM_SCOR), 0), 100) AS MIN_EXAM,
+                        SUM(EXAM_SCOR) AS AVG_EXAM,
+                        SUM(CASE WHEN Z.EXAM_CD = 'M' THEN Z.TOT_SCOR END) AS MID_AVG,
+                        SUM(CASE WHEN Z.EXAM_CD = 'F' THEN Z.TOT_SCOR END) AS FIN_AVG
+                 FROM (
+                          SELECT A.SEME_YEAR,
+                                 A.SEME_SEQ,
+                                 A.SBJT_ID,
+                                 A.EXAM_CD,
+                                 A.PERIOD_CD,
+                                 A.CLAS_SEQ,
+                                 A.STDT_ID,
+                                 B.LV,
+                                 B.MID_RATIO,
+                                 B.FINAL_RATIO,
+                                 B.PASS_SCOR,
+                                 B.FAIL_SCOR,
+                                 B.FAIL_YN,
+                                 A.TOT_SCOR,
+                                 B.EVAL_RATIO,
+                                 A.TOT_SCOR * (IF(A.EXAM_CD = 'M', B.MID_RATIO, B.FINAL_RATIO) * 0.01) AS EXAM_SCOR
+                          FROM
+                              (SELECT AA.*,
+                                      IFNULL(SD.PERIOD_CD, #{periodCd}) AS PERIOD_CD,
+                                      IFNULL(SD.CLAS_SEQ, #{clasSeq}) AS CLAS_SEQ,
+                                      IFNULL(SD.STDT_ID, #{stdtId}) AS STDT_ID,
+                                      IFNULL(SD.SCOR, 0) + IFNULL(SD.PERF, 0) AS TOT_SCOR
+                               FROM
+                                   (SELECT SB.SEME_YEAR,
+                                           SB.SEME_SEQ,
+                                           SB.SBJT_ID,
+                                           COM.CODE AS EXAM_CD,
+                                           COM.NAME AS EXAM_NM
+                                    FROM jnu_sbjt SB,
+                                         common_code_m COM
+                                    WHERE COM.GROUP_CD = 'EXAM_CD'
+                                      AND SB.SEME_YEAR = #{semeYear}
+                                      AND SB.SEME_SEQ = #{semeSeq}
+                                   ) AA
+                                       LEFT JOIN jnu_scor_dtl SD
+                                             ON SD.SEME_YEAR = AA.SEME_YEAR
+                                             AND SD.SEME_SEQ = AA.SEME_SEQ
+                                             AND SD.SBJT_ID = AA.SBJT_ID
+                                             AND SD.EXAM_CD = AA.EXAM_CD
+                                             AND SD.PERIOD_CD = #{periodCd}
+                                             AND SD.CLAS_SEQ = #{clasSeq}
+                                             AND SD.STDT_ID = #{stdtId}
+                              ) A
+                          LEFT JOIN
+                              (SELECT em.SEME_YEAR ,
+                                      em.SEME_SEQ ,
+                                      em.LV ,
+                                      em.MID_RATIO ,
+                                      em.FINAL_RATIO ,
+                                      em.PASS_SCOR ,
+                                      em.FAIL_SCOR ,
+                                      ed.SBJT_ID ,
+                                      ed.EVAL_RATIO ,
+                                      ed.FAIL_YN
+                               FROM jnu_eval_mst em,
+                                    jnu_eval_dtl ed
+                               WHERE em.SEME_YEAR = ed.SEME_YEAR
+                                 AND em.SEME_SEQ = ed.SEME_SEQ
+                                 AND em.LV = ed.LV
+                                 AND em.SEME_YEAR = #{semeYear}
+                                 AND em.LV = #{lv}
+                              ) B
+                              ON A.SEME_YEAR = B.SEME_YEAR
+                             AND A.SBJT_ID = B.SBJT_ID
+                      ) Z
+                 GROUP BY Z.SEME_YEAR,
+                          Z.SEME_SEQ,
+                          Z.SBJT_ID,
+                          Z.PERIOD_CD,
+                          Z.CLAS_SEQ,
+                          Z.STDT_ID,
+                          Z.LV,
+                          Z.PASS_SCOR,
+                          Z.FAIL_SCOR,
+                          Z.FAIL_YN,
+                          Z.EVAL_RATIO
+             ) Z
+        GROUP BY Z.SEME_YEAR,
+                 Z.SEME_SEQ,
+                 Z.PERIOD_CD,
+                 Z.CLAS_SEQ,
+                 Z.STDT_ID,
+                 Z.LV,
+                 Z.PASS_SCOR,
+                 Z.FAIL_SCOR
+    </select>
+
+    <select id="getScorePeriod" parameterType="hashmap" resultType="hashmap">
+        SELECT DISTINCT SM.PERIOD_CD
+                      , FN_CODE_NM('PERIOD_CD', SM.PERIOD_CD) PERIOD_NM
+          FROM jnu_scor_mst SM
+         WHERE SM.SEME_YEAR = #{schSemeYear}
+           AND SM.SEME_SEQ  = #{schSemeSeq}
+    </select>
+
+    <select id="getSemeSbjt" parameterType="hashmap" resultType="com.infomind.axboot.domain.code.CommonCode">
+        SELECT CM.GROUP_CD
+             , SB.SBJT_ID AS CODE
+             , FN_GET_LANG('KOR', SB.SBJT_NM) AS NAME
+             , DATA1
+         FROM jnu_sbjt SB
+         LEFT OUTER JOIN common_code_m CM
+                     ON CM.GROUP_CD = 'SBJT_ID'
+                     AND CM.CODE     = SB.SBJT_ID
+        WHERE SB.SEME_YEAR         = #{schSemeYear}
+          AND SB.SEME_SEQ          = #{schSemeSeq}
+        ORDER BY CM.SORT
+    </select>
+
+    <select id="getScoreExcel" parameterType="hashmap" resultType="com.infomind.axboot.domain.scoreMst.ScoreExcel">
+        SELECT CL.*
+             , SC.MID_SCOR
+             , SC.FIN_SCOR
+             , SC.TOT_SCOR
+             , SC.SCOR_NM
+             , SC.EXAM_CD
+             , SC.SBJT_ID
+             , SC.SCOR
+             , SC.PERF
+        FROM (
+                 SELECT CM.SEME_YEAR,
+                        CM.SEME_SEQ,
+                        CM.PERIOD_CD,
+                        CM.CLAS_SEQ,
+                        CM.CLAS_NM,
+                        CM.LV,
+                        CD.STDT_ID,
+                        FN_CODE_NM('NATN_CD', ST.NATN_CD) AS NATN_NM,
+                        LP.KOR AS STDT_NM_KOR,
+                        LP.ENG AS STDT_NM_ENG,
+                        FN_CODE_NM('GENDER', ST.GENDER) AS GENDER_NM,
+                        DATE_FORMAT(ST.BIRTH_DT, '%Y.%m') AS BIRTH_MT
+                 FROM jnu_clas_mst CM,
+                      jnu_clas_dtl CD
+                          LEFT JOIN jnu_stdt ST
+                                    ON CD.STDT_ID = ST.STDT_ID
+                          LEFT JOIN jnu_lang_pack LP
+                                    ON ST.STDT_NM = LP.LANG_KEY
+                 WHERE CM.SEME_YEAR = CD.SEME_YEAR
+                   AND CM.SEME_SEQ = CD.SEME_SEQ
+                   AND CM.PERIOD_CD = CD.PERIOD_CD
+                   AND CM.CLAS_SEQ = CD.CLAS_SEQ
+#                    AND CD.STATUS_CD = '0'
+                   AND CM.SEME_YEAR = #{schSemeYear}
+                   AND CM.SEME_SEQ = #{schSemeSeq}
+                    <if test='schMyClasChk.equals("true")'>
+                        AND EXISTS (SELECT 1 FROM jnu_clas_dtl CDU
+                                    WHERE CDU.SEME_YEAR = #{schSemeYear}
+                                    AND CDU.SEME_SEQ = #{schSemeSeq}
+                                    AND CDU.PERIOD_CD = #{schPeriodCd}
+                                    AND CDU.CLAS_SEQ = #{schClasSeq}
+                                    AND CD.STDT_ID = CDU.STDT_ID)
+                    </if>
+             ) CL
+                 LEFT JOIN (
+                            SELECT SM.SEME_YEAR
+                                 , SM.SEME_SEQ
+                                 , SM.PERIOD_CD
+                                 , SM.CLAS_SEQ
+                                 , SM.STDT_ID
+                                 , SM.MID_SCOR
+                                 , SM.FIN_SCOR
+                                 , SM.TOT_SCOR
+                                 , FN_CODE_NM('SCOR_CD', SM.SCOR_CD) AS SCOR_NM
+                                 , SD.EXAM_CD
+                                 , SD.SBJT_ID
+                                 , SD.SCOR
+                                 , SD.PERF
+                            FROM jnu_scor_mst SM
+                               , jnu_scor_dtl SD
+                            WHERE SM.SEME_YEAR = SD.SEME_YEAR
+                              AND SM.SEME_SEQ  = SD.SEME_SEQ
+                              AND SM.PERIOD_CD = SD.PERIOD_CD
+                              AND SM.CLAS_SEQ  = SD.CLAS_SEQ
+                              AND SM.STDT_ID   = SD.STDT_ID
+                              AND SM.SEME_YEAR = #{schSemeYear}
+                              AND SM.SEME_SEQ = #{schSemeSeq}
+                            <if test='schMyClasChk.equals("true")'>
+                                AND EXISTS (SELECT 1 FROM jnu_clas_dtl CDU
+                                            WHERE CDU.SEME_YEAR = #{schSemeYear}
+                                            AND CDU.SEME_SEQ = #{schSemeSeq}
+                                            AND CDU.PERIOD_CD = #{schPeriodCd}
+                                            AND CDU.CLAS_SEQ = #{schClasSeq}
+                                            AND SD.STDT_ID = CDU.STDT_ID)
+                            </if>
+                        ) SC
+               ON CL.SEME_YEAR = SC.SEME_YEAR
+               AND CL.SEME_SEQ = SC.SEME_SEQ
+               AND CL.PERIOD_CD = SC.PERIOD_CD
+               AND CL.CLAS_SEQ = SC.CLAS_SEQ
+               AND CL.STDT_ID = SC.STDT_ID
+        WHERE SC.EXAM_CD IS NOT NULL
+        ORDER BY CL.STDT_ID, CL.PERIOD_CD, SC.EXAM_CD
+    </select>
+</mapper>

@@ -1,0 +1,82 @@
+package com.infomind.axboot.security;
+
+import com.infomind.axboot.domain.user.SessionUser;
+import com.infomind.axboot.domain.user.UserService;
+import com.chequer.axboot.core.api.response.ApiResponse;
+import com.chequer.axboot.core.code.ApiStatus;
+import com.chequer.axboot.core.utils.HttpUtils;
+import com.chequer.axboot.core.utils.JsonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+public class AXBootLoginFilter extends AbstractAuthenticationProcessingFilter {
+
+    private final AXBootTokenAuthenticationService adminTokenAuthenticationService;
+    private final AXBootAuthenticationEntryPoint adminAuthenticationEntryPoint;
+    private final UserService userService;
+
+    public AXBootLoginFilter(String urlMapping, AXBootTokenAuthenticationService adminTokenAuthenticationService, UserService userService, AuthenticationManager authenticationManager, AXBootAuthenticationEntryPoint adminAuthenticationEntryPoint) {
+        super(new AntPathRequestMatcher(urlMapping));
+
+        this.adminTokenAuthenticationService = adminTokenAuthenticationService;
+        this.userService = userService;
+        this.adminAuthenticationEntryPoint = adminAuthenticationEntryPoint;
+        this.setAuthenticationFailureHandler(new LoginFailureHandler());
+        setAuthenticationManager(authenticationManager);
+    }
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+        final SessionUser user = new ObjectMapper().readValue(request.getInputStream(), SessionUser.class);
+        final UsernamePasswordAuthenticationToken loginToken = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+        return getAuthenticationManager().authenticate(loginToken);
+    }
+
+    @Override
+    @Transactional
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+        final AXBootUserAuthentication userAuthentication = new AXBootUserAuthentication((SessionUser) authentication.getPrincipal());
+        adminTokenAuthenticationService.addAuthentication(response, userAuthentication);
+
+        try {
+            userService.saveLoginFailCntToZero((String)userAuthentication.getPrincipal());
+        } catch(Exception e) {
+            System.out.println("로그인 시도 횟수 초기화 실패.");
+        }
+
+        response.setContentType(HttpUtils.getJsonContentType(request));
+        response.getWriter().write(JsonUtils.toJson(ApiResponse.of(ApiStatus.SUCCESS, "Login Success")));
+        response.getWriter().flush();
+    }
+
+    private class LoginFailureHandler implements AuthenticationFailureHandler {
+        @Override
+        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+            if (exception instanceof BadCredentialsException) {
+                final SessionUser user = new ObjectMapper().readValue(request.getInputStream(), SessionUser.class);
+
+                try {
+                    userService.saveLoginFailCnt(user.getUsername());
+                } catch(Exception e) {
+                    System.out.println("로그인 시도 횟수 업데이트 실패.");
+                }
+            }
+
+            adminAuthenticationEntryPoint.commence(request, response, exception);
+        }
+    }
+}

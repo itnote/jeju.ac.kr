@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.certificate.CertificateMapper">
+
+    <select id="enrollmentList" parameterType="map" resultType="com.infomind.axboot.domain.certificate.Certificate">
+        SELECT SE.SEME_YEAR
+             , SE.SEME_SEQ
+             , DATE_FORMAT(SE.START_DT, '%Y. %m. %d') AS START_DT
+             , DATE_FORMAT(SE.END_DT, '%Y. %m. %d') AS END_DT
+             , SE.TOT_HOURS
+             , CD.STDT_ID
+             , LP.KOR AS STDT_NM_KOR
+             , LP.ENG AS STDT_NM_ENG
+             , CO.REMARK AS NATN_NM
+             , FN_CODE_NM('GENDER', ST.GENDER) AS GENDER_NM
+             , DATE_FORMAT(ST.BIRTH_DT, '%Y. %m. %d') AS BIRTH_DT
+             , DATE_FORMAT(ST.BIRTH_DT, '%Y.%m') AS BIRTH_MT
+             , IF(#{schPrintDt} BETWEEN SE.START_DT AND SE.END_DT, '중', '예정') AS DURING
+             , #{schPrintDt} AS PRINT_DT
+             , DATE_FORMAT(#{schPrintDt}, '%Y년 %m월 %d일') AS PRINT_DT_KOR
+             , MAX(CM.LV) LV
+        FROM jnu_seme SE
+           , jnu_clas_mst CM
+           , jnu_clas_dtl CD
+                 LEFT JOIN jnu_stdt ST
+                           ON CD.STDT_ID = ST.STDT_ID
+                 LEFT JOIN jnu_lang_pack LP
+                           ON ST.STDT_NM = LP.LANG_KEY
+                 LEFT JOIN common_code_m CO
+                           ON GROUP_CD = 'NATN_CD'
+                          AND ST.NATN_CD = CO.CODE
+        WHERE SE.SEME_YEAR = CM.SEME_YEAR
+          AND SE.SEME_SEQ = CM.SEME_SEQ
+          AND CM.SEME_YEAR = CD.SEME_YEAR
+          AND CM.SEME_SEQ = CD.SEME_SEQ
+          AND CM.PERIOD_CD = CD.PERIOD_CD
+          AND CM.CLAS_SEQ = CD.CLAS_SEQ
+          AND CD.STATUS_CD = '0'
+          AND SE.SEME_YEAR = #{schSemeYear}
+          AND SE.SEME_SEQ = #{schSemeSeq}
+        <if test='!schStdt.equals("")'>
+            AND (CD.STDT_ID  LIKE  CONCAT('%',#{schStdt},'%') OR LP.KOR LIKE  CONCAT('%',#{schStdt},'%') OR LP.ENG  LIKE  CONCAT('%',#{schStdt},'%'))
+        </if>
+        GROUP BY SE.SEME_YEAR, SE.SEME_SEQ, CD.STDT_ID
+    </select>
+
+    <select id="completionList" parameterType="map" resultType="com.infomind.axboot.domain.certificate.Certificate">
+        SELECT DISTINCT SE.SEME_YEAR
+                      , SE.SEME_SEQ
+                      , DATE_FORMAT(SE.START_DT, '%Y. %m. %d') AS START_DT
+                      , DATE_FORMAT(SE.END_DT, '%Y. %m. %d') AS END_DT
+                      , DATE_FORMAT(SE.START_DT, '%Y년 %m월 %d일') AS START_DT_KOR
+                      , DATE_FORMAT(SE.END_DT, '%Y년 %m월 %d일') AS END_DT_KOR
+                      , DATE_FORMAT(SE.START_DT, '%M %d, %Y') AS START_DT_ENG
+                      , DATE_FORMAT(SE.END_DT, '%M %d, %Y') AS END_DT_ENG
+                      , SE.TOT_HOURS
+                      , CD.STDT_ID
+                      , LP.KOR AS STDT_NM_KOR
+                      , LP.ENG AS STDT_NM_ENG
+                      , CO.REMARK AS NATN_NM
+                      , FN_CODE_NM('GENDER', ST.GENDER) AS GENDER_NM
+                      , DATE_FORMAT(ST.BIRTH_DT, '%Y. %m. %d') AS BIRTH_DT
+                      , #{schPrintDt} AS PRINT_DT
+                      , DATE_FORMAT(#{schPrintDt}, '%Y년 %m월 %d일') AS PRINT_DT_KOR
+                      , DATE_FORMAT(#{schPrintDt}, '%M %d, %Y') AS PRINT_DT_ENG
+        FROM jnu_seme SE
+           , jnu_clas_mst CM
+           , jnu_clas_dtl CD
+                 LEFT JOIN jnu_stdt ST
+                           ON CD.STDT_ID = ST.STDT_ID
+                 LEFT JOIN jnu_lang_pack LP
+                           ON ST.STDT_NM = LP.LANG_KEY
+                 LEFT JOIN common_code_m CO
+                           ON GROUP_CD = 'NATN_CD'
+                          AND ST.NATN_CD = CO.CODE
+        WHERE SE.SEME_YEAR = CM.SEME_YEAR
+          AND SE.SEME_SEQ = CM.SEME_SEQ
+          AND CM.SEME_YEAR = CD.SEME_YEAR
+          AND CM.SEME_SEQ = CD.SEME_SEQ
+          AND CM.PERIOD_CD = CD.PERIOD_CD
+          AND CM.CLAS_SEQ = CD.CLAS_SEQ
+          AND CD.STATUS_CD = '0'
+          AND SE.SEME_YEAR = #{schSemeYear}
+          AND SE.SEME_SEQ = #{schSemeSeq}
+        <if test='!schStdt.equals("")'>
+            AND (CD.STDT_ID  LIKE  CONCAT('%',#{schStdt},'%') OR LP.KOR LIKE  CONCAT('%',#{schStdt},'%') OR LP.ENG  LIKE  CONCAT('%',#{schStdt},'%'))
+        </if>
+    </select>
+
+    <select id="transcriptList" parameterType="map" resultType="com.infomind.axboot.domain.certificate.Transcript">
+        SELECT SC.SEME_YEAR
+             , SC.SEME_SEQ
+             , SC.PERIOD_CD
+             , SC.CLAS_SEQ
+             , SC.STDT_ID
+             , SC.LV
+             , CO.NAME AS SCORE_TITLE_KOR
+             , CO.REMARK AS SCORE_TITLE_ENG
+             , TRIM(SC.EXAM_SCOR_S) + 0 AS EXAM_SCOR_S
+             , TRIM(SC.EXAM_SCOR_W) + 0 AS EXAM_SCOR_W
+             , TRIM(SC.EXAM_SCOR_L) + 0 AS EXAM_SCOR_L
+             , TRIM(SC.EXAM_SCOR_R) + 0 AS EXAM_SCOR_R
+             , AT.TOT_HOURS
+             , TRIM(FLOOR(AT.ATDC_CNT / AT.TOT_HOURS * 100)) + 0 AS ATDC_RATE
+             , CONCAT(TRIM(FLOOR(AT.ATDC_CNT / AT.TOT_HOURS * 100)) + 0, '% (', AT.TOT_HOURS, 'hrs)') AS ATDC
+        FROM (  SELECT SC.SEME_YEAR
+                     , SC.SEME_SEQ
+                     , SC.PERIOD_CD
+                     , SC.CLAS_SEQ
+                     , SC.STDT_ID
+                     , SC.LV
+                     , ROUND(SUM(IF(SC.SBJT_ID = 'S', SC.TOT_SCOR * (IF(SC.EXAM_CD = 'M', EV.MID_RATIO, EV.FINAL_RATIO) * 0.01), 0)), 0) AS EXAM_SCOR_S
+                     , ROUND(SUM(IF(SC.SBJT_ID = 'W', SC.TOT_SCOR * (IF(SC.EXAM_CD = 'M', EV.MID_RATIO, EV.FINAL_RATIO) * 0.01), 0)), 0) AS EXAM_SCOR_W
+                     , ROUND(SUM(IF(SC.SBJT_ID = 'L', SC.TOT_SCOR * (IF(SC.EXAM_CD = 'M', EV.MID_RATIO, EV.FINAL_RATIO) * 0.01), 0)), 0) AS EXAM_SCOR_L
+                     , ROUND(SUM(IF(SC.SBJT_ID = 'R', SC.TOT_SCOR * (IF(SC.EXAM_CD = 'M', EV.MID_RATIO, EV.FINAL_RATIO) * 0.01), 0)), 0) AS EXAM_SCOR_R
+                FROM ( SELECT SM.SEME_YEAR
+                            , SM.SEME_SEQ
+                            , SM.PERIOD_CD
+                            , SM.CLAS_SEQ
+                            , SM.STDT_ID
+                            , CM.LV
+                            , SD.EXAM_CD
+                            , SD.SBJT_ID
+                            , IFNULL(SD.SCOR, 0) + IFNULL(SD.PERF, 0) AS TOT_SCOR
+                       FROM jnu_scor_mst SM
+                          , jnu_scor_dtl SD
+                          , jnu_clas_mst CM
+                       WHERE CM.SEME_YEAR = SM.SEME_YEAR
+                         AND CM.SEME_SEQ = SM.SEME_SEQ
+                         AND CM.PERIOD_CD = SM.PERIOD_CD
+                         AND CM.CLAS_SEQ = SM.CLAS_SEQ
+                         AND SM.SEME_YEAR = SD.SEME_YEAR
+                         AND SM.SEME_SEQ = SD.SEME_SEQ
+                         AND SM.PERIOD_CD = SD.PERIOD_CD
+                         AND SM.CLAS_SEQ = SD.CLAS_SEQ
+                         AND SM.STDT_ID = SD.STDT_ID
+                         AND SM.SEME_YEAR = #{schSemeYear}
+                         AND SM.SEME_SEQ = #{schSemeSeq}
+                     ) SC
+                     LEFT JOIN
+                     (SELECT em.SEME_YEAR
+                           , em.SEME_SEQ
+                           , em.LV
+                           , em.MID_RATIO
+                           , em.FINAL_RATIO
+                           , em.PASS_SCOR
+                           , em.FAIL_SCOR
+                           , ed.SBJT_ID
+                           , ed.EVAL_RATIO
+                           , ed.FAIL_YN
+                      FROM jnu_eval_mst em
+                         , jnu_eval_dtl ed
+                      WHERE em.SEME_YEAR = ed.SEME_YEAR
+                        AND em.SEME_SEQ = ed.SEME_SEQ
+                        AND em.LV = ed.LV
+                        AND em.SEME_YEAR = #{schSemeYear}
+                        <!--AND em.SEME_SEQ = #{schSemeSeq}-->
+                     )
+                         EV
+                     ON SC.SEME_YEAR = EV.SEME_YEAR
+                         AND SC.SBJT_ID = EV.SBJT_ID
+                         AND SC.LV = EV.LV
+                GROUP BY SC.SEME_YEAR
+                       , SC.SEME_SEQ
+                       , SC.PERIOD_CD
+                       , SC.CLAS_SEQ
+                       , SC.STDT_ID
+                       , SC.LV
+             ) SC
+             LEFT JOIN
+             (  SELECT AM.SEME_YEAR
+                     , AM.SEME_SEQ
+                     , AM.PERIOD_CD
+                     , AM.CLAS_SEQ
+                     , AD.STDT_ID
+                     , CASE AM.PERIOD_CD
+                           WHEN 'F' THEN SE.FIRST_HALF
+                           WHEN 'R' THEN SE.SECOND_HALF
+                           ELSE SE.TOT_HOURS END AS TOT_HOURS
+                     , SUM(IF(AD.ATDC_CD IN ('0', '1'), 1, 0)) - TRUNCATE(SUM(IF(AD.ATDC_CD = '1', 1, 0)) / 3, 0) AS ATDC_CNT
+                FROM jnu_atdc_mst AM
+                   , jnu_atdc_dtl AD
+                   , jnu_seme SE
+                WHERE AM.SEME_YEAR = AD.SEME_YEAR
+                  AND AM.SEME_SEQ = AD.SEME_SEQ
+                  AND AM.PERIOD_CD = AD.PERIOD_CD
+                  AND AM.CLAS_SEQ = AD.CLAS_SEQ
+                  AND AM.ATDC_DT = AD.ATDC_DT
+                  AND AM.ATDC_SEQ = AD.ATDC_SEQ
+                  AND AM.SEME_YEAR = SE.SEME_YEAR
+                  AND AM.SEME_SEQ = SE.SEME_SEQ
+                  AND AM.SEME_YEAR = #{schSemeYear}
+                  AND AM.SEME_SEQ = #{schSemeSeq}
+                GROUP BY AM.SEME_YEAR
+                       , AM.SEME_SEQ
+                       , AM.PERIOD_CD
+                       , AM.CLAS_SEQ
+                       , AD.STDT_ID
+             ) AT
+             ON SC.SEME_YEAR = AT.SEME_YEAR
+             AND SC.SEME_SEQ = AT.SEME_SEQ
+             AND SC.PERIOD_CD = AT.PERIOD_CD
+             AND SC.CLAS_SEQ = AT.CLAS_SEQ
+             AND SC.STDT_ID = AT.STDT_ID
+             LEFT JOIN common_code_m CO
+                    ON CO.GROUP_CD = 'PERIOD_CD'
+                   AND CO.CODE = SC.PERIOD_CD
+    </select>
+
+
+    <select id="tuitionList" parameterType="map" resultType="com.infomind.axboot.domain.certificate.Certificate">
+        SELECT DISTINCT SE.SEME_YEAR
+                    , SE.SEME_SEQ
+                    , DATE_FORMAT(SE.START_DT, '%Y. %m. %d') AS START_DT
+                    , DATE_FORMAT(SE.END_DT, '%Y. %m. %d') AS END_DT
+                    , DATE_FORMAT(SE.START_DT, '%Y년 %m월 %d일') AS START_DT_KOR
+                    , DATE_FORMAT(SE.END_DT, '%Y년 %m월 %d일') AS END_DT_KOR
+                    , DATE_FORMAT(SE.START_DT, '%M %d, %Y') AS START_DT_ENG
+                    , DATE_FORMAT(SE.END_DT, '%M %d, %Y') AS END_DT_ENG
+                    , SE.TOT_HOURS
+                    , CD.STDT_ID
+                    , LP.KOR AS STDT_NM_KOR
+                    , LP.ENG AS STDT_NM_ENG
+                    , LP.CHN AS STDT_NM_CHN
+                    , FN_GET_LANG('KOR',SE.CORS_NM) AS SEME_NM_KOR
+                    , FN_GET_LANG('ENG',SE.CORS_NM) AS SEME_NM_ENG
+                    , CO.REMARK AS NATN_NM
+                    , ST.NATN_CD
+                    , FN_CODE_NM('GENDER', ST.GENDER) AS GENDER_NM
+                    , DATE_FORMAT(ST.BIRTH_DT, '%Y. %m. %d') AS BIRTH_DT
+                    , #{schPrintDt} AS PRINT_DT
+                    , DATE_FORMAT(#{schPrintDt}, '%Y년 %m월 %d일') AS PRINT_DT_KOR
+                    , DATE_FORMAT(#{schPrintDt}, '%M %d, %Y') AS PRINT_DT_ENG
+                    , DATE_FORMAT(#{schPrintDt}, '%Y年 %m月 %d日') AS PRINT_DT_CHN
+                    , DATE_FORMAT(CD.FEE_DT, '%Y. %m. %d.') AS FEE_DT
+                    , CD.FRESH_YN
+                    , FORMAT(IF(CD.FRESH_YN = 'Y',SE.NEW_REG_STD_AMT, SE.OLD_REG_STD_AMT),0) AS REG_AMT
+                    , FORMAT(IF(CD.DORM_PAY_YN = 'Y',SE.NEW_DORM_STD_AMT,'0'),0) AS DORM_AMT
+                    , FORMAT(IF(CD.APP_PAY_YN = 'Y',SE.NEW_APP_STD_AMT,'0'),0) AS APP_AMT
+                    , FORMAT(IF(CD.INS_PAY_YN = 'Y',SE.NEW_INS_STD_AMT,'0'),0) AS INS_AMT
+                    , FORMAT(IF(CD.BED_PAY_YN = 'Y',SE.NEW_BED_STD_AMT,'0'),0) AS BED_AMT
+                    , FORMAT(IF(CD.FRESH_YN = 'Y',SE.NEW_REG_STD_AMT, SE.OLD_REG_STD_AMT) + IF(CD.DORM_PAY_YN = 'Y',SE.NEW_DORM_STD_AMT,'0') + IF(CD.INS_PAY_YN = 'Y',SE.NEW_INS_STD_AMT,'0'),0) AS TOTAL_AMT
+                    , FORMAT(IF(CD.FRESH_YN = 'Y',SE.NEW_REG_STD_AMT, SE.OLD_REG_STD_AMT) + IF(CD.DORM_PAY_YN = 'Y',SE.NEW_DORM_STD_AMT,'0') + IF(CD.INS_PAY_YN = 'Y',SE.NEW_INS_STD_AMT,'0')
+                    + IF(CD.APP_PAY_YN = 'Y',SE.NEW_APP_STD_AMT,'0')+ IF(CD.BED_PAY_YN = 'Y',SE.NEW_BED_STD_AMT,'0'),0) AS ALL_AMT
+                    , DATE_FORMAT(#{schPaymentDt}, '%Y. %m. %d.') AS PAYMENT_DT
+                    , DATE_FORMAT(#{schPaymentDt}, '%M %d, %Y') AS PAYMENT_DT_ENG
+                    , DATE_FORMAT(#{schPaymentDt}, '%Y年 %m月 %d日') AS PAYMENT_DT_CHN
+        FROM jnu_seme SE
+            , jnu_clas_mst CM
+            , jnu_clas_dtl CD
+                LEFT JOIN jnu_stdt ST
+                        ON CD.STDT_ID = ST.STDT_ID
+                LEFT JOIN jnu_lang_pack LP
+                        ON ST.STDT_NM = LP.LANG_KEY
+                LEFT JOIN common_code_m CO
+                        ON GROUP_CD = 'NATN_CD'
+                       AND ST.NATN_CD = CO.CODE
+        WHERE SE.SEME_YEAR = CM.SEME_YEAR
+        AND SE.SEME_SEQ = CM.SEME_SEQ
+        AND CM.SEME_YEAR = CD.SEME_YEAR
+        AND CM.SEME_SEQ = CD.SEME_SEQ
+        AND CM.PERIOD_CD = CD.PERIOD_CD
+        AND CM.CLAS_SEQ = CD.CLAS_SEQ
+        AND CD.STATUS_CD = '0'
+        AND SE.SEME_YEAR = #{schSemeYear}
+        AND SE.SEME_SEQ = #{schSemeSeq}
+        AND CM.PERIOD_CD = #{schPeriodCd}
+        <if test='!schStdt.equals("")'>
+            AND (CD.STDT_ID  LIKE  CONCAT('%',#{schStdt},'%') OR LP.KOR LIKE  CONCAT('%',#{schStdt},'%') OR LP.ENG  LIKE  CONCAT('%',#{schStdt},'%'))
+        </if>
+        <if test='schFeeYn.equals("N")'>
+            AND CD.FEE_DT IS NULL
+        </if>
+        <if test='schFeeYn.equals("Y")'>
+            AND CD.FEE_DT IS NOT NULL
+        </if>
+    </select>
+
+
+    <select id="tuitionExcelList" parameterType="map" resultType="com.infomind.axboot.domain.certificate.TuitionExcel">
+            SELECT A.STDT_ID
+                 , C.KOR                            AS STDT_NM
+                 , C.ENG                            AS STDT_NM_ENG
+                 , C.CHN                            AS STDT_NM_CHN
+                 , FN_CODE_NM('NATN_CD', B.NATN_CD) AS NATN_NM
+                 , B.BIRTH_DT
+                 , FN_CODE_NM('GENDER', B.GENDER) AS GENDER_NM
+                 , FRESH_YN
+                 , FEE_DT
+                 , DORM_PAY_YN
+                 , APP_PAY_YN
+                 , INS_PAY_YN
+                 , BED_PAY_YN
+            FROM   JNU_CLAS_DTL A
+                   LEFT JOIN JNU_STDT B
+                   ON     A.STDT_ID = B.STDT_ID
+                   LEFT JOIN JNU_LANG_PACK C
+                   ON     B.STDT_NM = C.LANG_KEY
+                   LEFT JOIN JNU_CLAS_MST M
+                   ON     A.CLAS_SEQ  = M.CLAS_SEQ
+                   AND    A.SEME_YEAR = M.SEME_YEAR
+                   AND    A.SEME_SEQ  = M.SEME_SEQ
+                   AND    A.PERIOD_CD = M.PERIOD_CD
+            WHERE  A.SEME_YEAR        = #{schSemeYear}
+            AND    A.SEME_SEQ         = #{schSemeSeq}
+            AND    A.PERIOD_CD        = #{schPeriodCd}
+    </select>
+
+
+    <select id="docLogList" parameterType="hashmap" resultType="com.infomind.axboot.domain.certificate.Certificate">
+        SELECT
+            A.DOC_SEQ,
+            A.SEME_YEAR,
+            A.SEME_SEQ,
+            LP.KOR AS STDT_NM_KOR,
+            LP.ENG AS STDT_NM_ENG,
+            FN_GET_LANG('KOR',SE.CORS_NM) AS SEME_NM_KOR,
+            A.STDT_ID,
+            A.DOC_CD,
+            FN_CODE_NM('DOC_CD', A.DOC_CD) AS DOC_CD_NM,
+            A.PRINT_DT,
+            A.CREATED_AT,
+            FN_USER_NM(A.CREATED_BY) AS CREATED_BY
+        FROM JNU_DOC_LOG A LEFT JOIN JNU_SEME SE
+            ON A.SEME_YEAR = SE.SEME_YEAR AND A.SEME_SEQ = SE.SEME_SEQ
+         LEFT JOIN JNU_STDT ST
+              ON A.STDT_ID = ST.STDT_ID
+          LEFT JOIN JNU_LANG_PACK LP
+              ON ST.STDT_NM = LP.LANG_KEY
+        WHERE 1=1
+        <if test='!schDocSeq.equals("")'>
+            AND YEAR(A.PRINT_DT) = #{schSemeYear}
+            AND A.DOC_SEQ = #{schDocSeq}
+        </if>
+        <if test='schDocSeq.equals("")'>
+              AND DATE_FORMAT(A.CREATED_AT,'%Y-%m-%d') = #{schCreatedAt}
+        </if>
+
+
+    </select>
+
+
+</mapper>

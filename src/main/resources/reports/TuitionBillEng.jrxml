@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="JNU_User_Report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="60206a4c-9ffd-4c3f-8175-147cbc7a2b61">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="imagePath" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="stdtNmKor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="stdtNmKor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="natnNm" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NAME"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="student_sample"/>
+	</field>
+	<field name="birthDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="stdtId" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="startDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="endDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value=""/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="printDt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="printDt"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="totHours" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="stdtNmKor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value=""/>
+	</field>
+	<field name="docSeq" class="java.lang.String"/>
+	<field name="during" class="java.lang.String"/>
+	<field name="printYear" class="java.lang.String"/>
+	<field name="printDtKor" class="java.lang.String"/>
+	<field name="regAmt" class="java.lang.String"/>
+	<field name="dormAmt" class="java.lang.String"/>
+	<field name="appAmt" class="java.lang.String"/>
+	<field name="insAmt" class="java.lang.String"/>
+	<field name="bedAmt" class="java.lang.String"/>
+	<field name="allAmt" class="java.lang.String"/>
+	<field name="stdtNmChn" class="java.lang.String"/>
+	<field name="printDtChn" class="java.lang.String"/>
+	<field name="paymentDtChn" class="java.lang.String"/>
+	<field name="stdtNmEng" class="java.lang.String"/>
+	<field name="paymentDtEng" class="java.lang.String"/>
+	<field name="printDtEng" class="java.lang.String"/>
+	<field name="natnCd" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="642" splitType="Stretch">
+			<textField>
+				<reportElement x="5" y="34" width="550" height="40" uuid="8cefe611-cee7-48ef-a0fa-47026bf41300"/>
+				<textElement textAlignment="Center">
+					<font fontName="georgia" size="30" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["JEJU NATIONAL UNIVERSITY"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="5" y="74" width="550" height="20" uuid="108a9d3f-4613-417e-b85e-b09308703d56"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="10" isBold="true"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["102 Jejudaehakno, Jeju-si, Jeju Special Self-Governing Province, Korea, 63243"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="5" y="94" width="550" height="20" uuid="01c843bf-8bbc-49e9-92f8-ae6f7cd707f1"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="14" isBold="true"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Center for International Affairs"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="40" y="224" width="80" height="26" uuid="42671d3a-ce97-4954-93e6-95fc43aa41cf"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="250" width="120" height="26" uuid="d0077940-121a-405a-95a4-4172f248ebd8"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="14" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Date of Birth : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="276" width="110" height="26" uuid="befc67f1-92ed-4e8c-be32-df7485b1466e"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nationality : ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="224" width="360" height="26" uuid="2d9b74f4-c0e5-45a9-9a54-2e0816f26f0c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b288738d-02c2-4302-8161-5c7f0e7487c2"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{stdtNmEng}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="168" y="250" width="155" height="26" uuid="b0fe1fdb-8418-4aa5-b09d-4854e30f19e3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0a3f5bdd-a1f4-4257-83e6-008e27b5cbcd"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{birthDt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="156" y="276" width="155" height="26" uuid="93e885bc-bc7f-4d92-b51d-7e11c5885667">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9847aab6-8ba8-464a-8949-45eb6cd57c18"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{natnNm}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="316" width="460" height="22" uuid="88fd240c-a93d-4c97-9422-91bc31302ca7"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[1.  Tuition & Fees ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="354" width="60" height="30" backcolor="#E3E3E3" uuid="3f4b97a4-e144-4e00-89b0-fccb1070b8b9">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Application Fee]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="354" width="80" height="30" backcolor="#E3E3E3" uuid="dff2ce94-2dc9-4d1e-82c1-c49237206233">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Tuition
+(400)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="354" width="80" height="30" backcolor="#E3E3E3" uuid="99052ccd-a310-4116-a3e7-c20dca6fed7e">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Dormitory
+(6mths)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="354" width="80" height="30" backcolor="#E3E3E3" uuid="f1b7e56b-9106-431d-9760-f91b178e5dc9">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Insurance
+(1year)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="354" width="80" height="30" backcolor="#E3E3E3" uuid="80f80ccb-2cd7-4b49-bb15-82b237e3baa2">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Others
+(Bedding)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="354" width="80" height="30" backcolor="#E3E3E3" uuid="9908ecf4-3ff7-4de6-9e51-3a35a7e77a82">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="384" width="60" height="30" uuid="7c8c059a-0638-4db2-aa5a-e85fbaeec500"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{appAmt}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="338" width="150" height="16" uuid="03659452-69a2-4052-9acf-17bd0c2f0fcb"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[(Unit:Korean Won)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="110" y="384" width="80" height="30" uuid="79b8aea9-8d26-44e0-8b56-b72199dec833"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{regAmt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="190" y="384" width="80" height="30" uuid="044aa135-0065-4ee0-b47a-dbfc6f52edf5"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dormAmt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="270" y="384" width="80" height="30" uuid="17b6e662-6a60-4a68-8c3a-30ef71356117"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{insAmt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="384" width="80" height="30" uuid="06853349-b27f-4607-931e-41db6dc101e9"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bedAmt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="384" width="80" height="30" uuid="eeb88a1d-d742-40d8-8b29-9f7cdccec07f"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{allAmt}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="414" width="460" height="29" uuid="929479fe-c6ec-431a-8d49-cfc7a0fd1c88"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[* When transferring to US dollars, overpayments will be calculated after the entrance according to the currency exchange.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="454" width="160" height="22" uuid="4db52d84-2e63-443f-baa7-6e7b67febdcd"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[2.  Due Date of Payment: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="476" width="460" height="22" uuid="56667e6c-69df-4f2c-bbbf-bc4466d4202c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[3.  Account Information]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="200" y="454" width="310" height="22" uuid="d487d8f4-fda5-45b8-aa8b-574229f1330f"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{paymentDtEng}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="498" width="150" height="30" backcolor="#E3E3E3" uuid="e3b58dfe-1ce8-4f66-beb2-7c6f1eada490">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Bank Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="498" width="100" height="30" backcolor="#E3E3E3" uuid="ef291f5b-f69a-4dfe-b7ba-d7c1c8c31a61">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Account No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="498" width="100" height="30" backcolor="#E3E3E3" uuid="f4bad299-b449-4205-985d-5a2f307a7a08">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[Account Holder]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="498" width="110" height="30" backcolor="#E3E3E3" uuid="dc6afd1d-2fb9-41bd-8183-199a72c93267">
+					<property name="com.jaspersoft.layout.grid.x" value="1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="6"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="false"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="1.25"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="9" isBold="true"/>
+					<paragraph spacingAfter="0"/>
+				</textElement>
+				<text><![CDATA[SWIFTCODE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="528" width="150" height="28" uuid="bc4e9e16-16c5-4a7e-8733-27299a11e4f3"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<text><![CDATA[NATIONAL AGRICULTURAL
+COOPERATIVE FEDERATION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="528" width="100" height="28" uuid="cab702f3-fb69-4d74-ae15-176823509ad8"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<text><![CDATA[301-0067-1686-91]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="528" width="100" height="28" uuid="d87c4fc8-053f-45d7-adbe-bb867f3ad6cb"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<text><![CDATA[JEJU NATIONAL
+UNIVERSITY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="528" width="110" height="28" uuid="7dc12f68-ea26-463c-9de7-ec34bf5db265"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<text><![CDATA[NACFKRSEXXX]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="556" width="460" height="27" uuid="087cda56-cac3-4209-8315-6dd09c82cf17"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<leftPen lineWidth="1.25"/>
+					<bottomPen lineWidth="1.25"/>
+					<rightPen lineWidth="1.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="9"/>
+				</textElement>
+				<text><![CDATA[Address: 102 JEJUDAEHAK-RO, JEJU-SI, JEJU-DO, KOREA / 82-64-754-2199]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="583" width="460" height="15" uuid="f7ec9a21-9ce1-4b5d-94e8-f313c9a85684"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[*YOU MUST SEND THE PROOF OF TRANSFER TO intl6@jejunu.ac.kr..]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="598" width="460" height="33" uuid="3468adbb-f19c-48a6-82fb-1cf6cb9a58ac"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[*If the tuition and fees are not paid by the deadline, the student will be considered to have no further interest in joining the program.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="124" width="400" height="37" uuid="d62c9a5b-66d4-49df-bca9-363387fd88c7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="28" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INVOICE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="158" width="400" height="29" uuid="f361aeb4-b998-4d01-ab0b-a66f7c5f2b37"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[for]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="188" width="401" height="24" uuid="fca07d4d-e9db-4cbf-894a-2bf084c9ce0d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KOREAN LANGUAGE PROGRAM]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="65" splitType="Stretch">
+			<textField pattern="YYYY년 MM월 dd일">
+				<reportElement x="180" y="14" width="200" height="30" uuid="ed4d1350-433d-479e-8136-9d62569dc40f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="함초롬바탕" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{printDtEng}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="95" splitType="Stretch">
+			<image>
+				<reportElement x="420" y="-14" width="90" height="90" uuid="c8d54739-8fe5-4df1-b610-90c24f4b61cc"/>
+				<imageExpression><![CDATA[$P{imagePath} + "sign.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="10" y="-6" width="540" height="70" uuid="10f1e798-7fd9-4cb6-a0f1-8b148a8ea4d5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="georgia" size="24" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dean, Center for International Affairs
+Jeju National University
+]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

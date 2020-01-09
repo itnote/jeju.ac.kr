@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.scoreLog.ScoreLogMapper">
+
+    <select id="getScoreLogList" parameterType="map" resultType="com.infomind.axboot.domain.scoreLog.ScoreLog">
+        SELECT SL.LOG_ID,
+               FN_CODE_NM('EXAM_CD', SL.EXAM_CD) AS EXAM_NM,
+               FN_GET_LANG('KOR', SB.SBJT_NM) AS SBJT_NM_KOR,
+               SL.OLD_SCOR,
+               SL.NEW_SCOR,
+               SL.REASON,
+               SL.CREATED_AT,
+               FN_USER_NM(SL.CREATED_BY) AS CREATED_BY_NM
+        FROM jnu_scor_log SL
+                 LEFT JOIN jnu_sbjt SB
+                       ON SL.SEME_YEAR = SB.SEME_YEAR
+                       AND SL.SEME_SEQ = SB.SEME_SEQ
+                       AND SL.SBJT_ID = SB.SBJT_ID
+        WHERE 1 = 1
+          AND SL.SEME_YEAR = #{schSemeYear}
+          AND SL.SEME_SEQ = #{schSemeSeq}
+          AND SL.PERIOD_CD =  #{schPeriodCd}
+          AND SL.CLAS_SEQ =  #{schClasSeq}
+          AND SL.STDT_ID = #{schStdtId}
+        ORDER BY SL.LOG_ID DESC
+    </select>
+
+</mapper>

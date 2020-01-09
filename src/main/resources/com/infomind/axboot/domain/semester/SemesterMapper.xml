@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.semester.SemesterMapper">
+
+    <parameterMap id="semester" type="com.infomind.axboot.domain.semester.Semester"/>
+
+    <select id="getSemesterMgmtList" parameterType="hashmap" resultType="com.infomind.axboot.domain.semester.Semester">
+        SELECT A.SEME_YEAR
+              , A.SEME_SEQ
+              , A.SEME_CD
+              , CONCAT(A.SEME_YEAR, '-', FN_CODE_NM('SEME_CD', A.SEME_CD)) AS SEME_NM
+              , B.KOR
+              , B.ENG
+              , B.CHN
+              , A.CORS_NM
+              , A.TOT_HOURS
+              , A.FIRST_HALF
+              , A.SECOND_HALF
+              , A.START_DT
+              , A.END_DT
+              , A.MON_CD
+              , A.TUE_CD
+              , A.WED_CD
+              , A.THU_CD
+              , A.FRI_CD
+              , A.NEW_REG_STD_AMT
+              , A.NEW_DORM_STD_AMT
+              , A.OLD_REG_STD_AMT
+              , A.NEW_INS_STD_AMT
+              , A.NEW_BED_STD_AMT
+              , A.NEW_APP_STD_AMT
+              , MAX(IF(A.MON_CD = CO.CODE, CONCAT(CO.DATA1, '/', CO.DATA2), NULL)) MON_HOURS
+              , MAX(IF(A.TUE_CD = CO.CODE, CONCAT(CO.DATA1, '/', CO.DATA2), NULL)) TUE_HOURS
+              , MAX(IF(A.WED_CD = CO.CODE, CONCAT(CO.DATA1, '/', CO.DATA2), NULL)) WED_HOURS
+              , MAX(IF(A.THU_CD = CO.CODE, CONCAT(CO.DATA1, '/', CO.DATA2), NULL)) THU_HOURS
+              , MAX(IF(A.FRI_CD = CO.CODE, CONCAT(CO.DATA1, '/', CO.DATA2), NULL)) FRI_HOURS
+          FROM JNU_SEME A
+                    LEFT JOIN common_code_m CO
+                            ON CO.GROUP_CD = 'WEEK_CD'
+             , JNU_LANG_PACK B
+         WHERE 1=1
+         AND A.CORS_NM = B.LANG_KEY
+         <if test='!semeYear.equals("")'>
+           AND SEME_YEAR =  #{semeYear}
+         </if>
+        <if test='!semeCd.equals("")'>
+            AND SEME_CD =  #{semeCd}
+        </if>
+        <if test='!semeSeq.equals("")'>
+            AND SEME_SEQ =  #{semeSeq}
+        </if>
+        GROUP BY A.SEME_YEAR, A.SEME_SEQ
+        ORDER BY A.SEME_YEAR DESC, A.SEME_SEQ DESC
+    </select>
+
+    <select id="getSemeYearCombo" resultType="map" parameterType="map">
+        SELECT DISTINCT SEME_YEAR FROM jnu_seme se
+        <if test='schMyClasChk.equals("true")'>
+            WHERE EXISTS (SELECT 1 FROM jnu_clas_mst cm WHERE se.SEME_YEAR = cm.SEME_YEAR AND (cm.TCHR_CD = #{userCd} OR cm.SUB_TCHR_CD = #{userCd}))
+        </if>
+        ORDER BY SEME_YEAR DESC
+    </select>
+
+    <select id="getSemeSeqCombo" resultType="map" parameterType="map">
+        SELECT SEME_YEAR,
+        SEME_SEQ,
+        FN_GET_LANG('KOR', CORS_NM) AS KOR
+        FROM jnu_seme se
+        WHERE SEME_YEAR = #{schSemeYear}
+        <if test='schMyClasChk.equals("true")'>
+          AND EXISTS (SELECT 1 FROM jnu_clas_mst cm WHERE se.SEME_YEAR = cm.SEME_YEAR AND se.SEME_SEQ = cm.SEME_SEQ AND (cm.TCHR_CD = #{userCd} OR cm.SUB_TCHR_CD = #{userCd}))
+        </if>
+        ORDER BY SEME_SEQ DESC
+    </select>
+
+    <select id="scheduleExcel" parameterType="com.infomind.axboot.domain.semester.Semester" resultType="com.infomind.axboot.domain.semester.SemesterScheduleExcel">
+        SELECT YEAR(DT.DT) AS YYYY
+             , DT.WEEK_OF_YEAR
+             , MAX(CASE WHEN SE.SEME_CD = 'S' THEN 'F' WHEN QT.SCHE_DT > DT.DT THEN 'F' WHEN QT.SCHE_DT &lt; DT.DT THEN 'R' ELSE 'FR' END) AS QUARTER_DIV
+             , MAX(IF(DT.DAY_OF_WEEK = '1', CONCAT_WS('|', DT.DT, IFNULL(SC.WEEK_CD, 'N0'), IFNULL(SC.SCHE_NM, ''), IFNULL(SC.HOLI_YN, '')), NULL)) AS SUN
+             , MAX(IF(DT.DAY_OF_WEEK = '2', CONCAT_WS('|', DT.DT, IF(IFNULL(SC.WEEK_CD, '')='', SE.MON_CD, SC.WEEK_CD), IFNULL(SC.SCHE_NM, ''), IFNULL(SC.HOLI_YN, '')), NULL)) AS MON
+             , MAX(IF(DT.DAY_OF_WEEK = '3', CONCAT_WS('|', DT.DT, IF(IFNULL(SC.WEEK_CD, '')='', SE.TUE_CD, SC.WEEK_CD), IFNULL(SC.SCHE_NM, ''), IFNULL(SC.HOLI_YN, '')), NULL)) AS TUE
+             , MAX(IF(DT.DAY_OF_WEEK = '4', CONCAT_WS('|', DT.DT, IF(IFNULL(SC.WEEK_CD, '')='', SE.WED_CD, SC.WEEK_CD), IFNULL(SC.SCHE_NM, ''), IFNULL(SC.HOLI_YN, '')), NULL)) AS WED
+             , MAX(IF(DT.DAY_OF_WEEK = '5', CONCAT_WS('|', DT.DT, IF(IFNULL(SC.WEEK_CD, '')='', SE.THU_CD, SC.WEEK_CD), IFNULL(SC.SCHE_NM, ''), IFNULL(SC.HOLI_YN, '')), NULL)) AS THU
+             , MAX(IF(DT.DAY_OF_WEEK = '6', CONCAT_WS('|', DT.DT, IF(IFNULL(SC.WEEK_CD, '')='', SE.FRI_CD, SC.WEEK_CD), IFNULL(SC.SCHE_NM, ''), IFNULL(SC.HOLI_YN, '')), NULL)) AS FRI
+             , MAX(IF(DT.DAY_OF_WEEK = '7', CONCAT_WS('|', DT.DT, IFNULL(SC.WEEK_CD, 'N0'), IFNULL(SC.SCHE_NM, ''), IFNULL(SC.HOLI_YN, '')), NULL)) AS SAT
+        FROM jnu_seme SE
+           , jnu_date DT
+                 LEFT JOIN jnu_sche SC
+                           ON SC.SCHE_DT = DT.DT
+                           AND SC.SEME_YEAR = #{semeYear}
+                           AND SC.SEME_SEQ = #{semeSeq}
+                 LEFT JOIN jnu_sche QT
+                           ON QT.SEME_YEAR = #{semeYear}
+                           AND QT.SEME_SEQ = #{semeSeq}
+                           AND QT.SCHE_NM = '후반기'
+        WHERE SE.SEME_YEAR = #{semeYear}
+          AND SE.SEME_SEQ = #{semeSeq}
+          AND DT.DT BETWEEN SE.START_DT AND END_DT
+        GROUP BY YYYY, DT.WEEK_OF_YEAR
+        ORDER BY YYYY, DT.WEEK_OF_YEAR
+    </select>
+
+    <select id="getSemesterAmt" parameterType="hashmap" resultType="com.infomind.axboot.domain.semester.Semester">
+        SELECT
+          A.SEME_YEAR
+        , B.KOR
+        , B.ENG
+        , B.CHN
+        , A.NEW_REG_STD_AMT
+        , A.NEW_DORM_STD_AMT
+        , A.OLD_REG_STD_AMT
+        , A.NEW_INS_STD_AMT
+        , A.NEW_BED_STD_AMT
+        , A.NEW_APP_STD_AMT
+        FROM JNU_SEME A , JNU_LANG_PACK B
+        WHERE 1=1
+          AND A.CORS_NM = B.LANG_KEY
+        <if test='!schSemeYear.equals("")'>
+            AND A.SEME_YEAR =  #{schSemeYear}
+        </if>
+        <if test='!schSemeSeq.equals("")'>
+            AND A.SEME_SEQ =  #{schSemeSeq}
+        </if>
+    </select>
+</mapper>

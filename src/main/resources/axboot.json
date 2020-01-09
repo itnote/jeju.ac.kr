@@ -1,0 +1,24 @@
+{
+  "title": "제주대학교 국제교류본부 관리 시스템",
+  "copyrights": "제주대학교 국제교류본부",
+  "logo": {
+    "header": "/assets/images/header-logo.png",
+    "login": "/assets/images/login-logo.png",
+    "logo": "logo.png"
+  },
+  "background": {
+    "login": "/assets/images/login-bg.jpg"
+  },
+  "layout": {
+    "leftSideMenu": "visible"
+  },
+  "sessionCookie": "f3535923-801c-47db-9116-a958004b41a6",
+  "extendedCss": [
+    "/assets/css/axboot.css"
+  ],
+  "extendedCssforIE9": [
+    "/assets/css/axboot-01.css",
+    "/assets/css/axboot-02.css",
+    "/assets/css/axboot-03.css"
+  ]
+}

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.schedule.ScheduleMapper">
+
+    <select id="getScheduleList" parameterType="hashmap" resultType="com.infomind.axboot.domain.schedule.Schedule">
+        SELECT A.SEME_YEAR
+             , A.SEME_SEQ
+             , A.SCHE_DT
+             , A.SCHE_NM
+             , A.HOLI_YN
+             , A.COUN_YN
+             , A.WEEK_CD
+             , CONCAT(CO.DATA1, '/', CO.DATA2) AS WEEK_HOURS
+             , B.START_DT
+             , B.END_DT
+             , B.MON_CD
+             , B.TUE_CD
+             , B.WED_CD
+             , B.THU_CD
+             , B.FRI_CD
+             , A.CREATED_AT
+             , A.CREATED_BY
+             , A.UPDATED_AT
+             , A.UPDATED_BY
+        FROM JNU_SCHE A
+                 LEFT JOIN JNU_SEME B
+                           ON A.SEME_SEQ = B.SEME_SEQ
+                           AND A.SEME_YEAR = B.SEME_YEAR
+                 LEFT JOIN common_code_m CO
+                           ON CO.GROUP_CD = 'WEEK_CD'
+                           AND CO.CODE = A.WEEK_CD
+        WHERE 1 = 1
+        <if test='!semeYear.equals("")'>
+          AND A.SEME_YEAR =  #{semeYear}
+        </if>
+        <if test='!semeSeq.equals("")'>
+          AND A.SEME_SEQ =  #{semeSeq}
+        </if>
+        <if test='!scheDt.equals("")'>
+          AND A.SCHE_DT =  #{scheDt}
+        </if>
+    </select>
+
+    <insert id="insertSchedule" parameterType="com.infomind.axboot.domain.schedule.Schedule" >
+        INSERT INTO JNU_SCHE(
+            SEME_YEAR,
+            SEME_SEQ,
+            SCHE_DT,
+            SCHE_NM,
+            HOLI_YN,
+            COUN_YN,
+            WEEK_CD,
+            CREATED_AT,
+            CREATED_BY
+        )VALUES(
+                   #{semeYear},
+                   #{semeSeq},
+                   #{scheDt},
+                   #{scheNm},
+                   #{holiYn},
+                   #{counYn},
+                   #{weekCd},
+                   now() ,
+                   #{createdBy}
+               )
+    </insert>
+
+    <update id="updateSchedule" parameterType="com.infomind.axboot.domain.schedule.Schedule" >
+        UPDATE JNU_SCHE
+        SET    SCHE_NM = #{scheNm},
+               HOLI_YN = #{holiYn},
+               COUN_YN = #{counYn},
+               WEEK_CD = #{weekCd},
+               UPDATED_AT = now(),
+               UPDATED_BY = #{updatedBy}
+        WHERE 1=1
+          AND SEME_YEAR = #{semeYear}
+          AND SEME_SEQ = #{semeSeq}
+          AND SCHE_DT = #{scheDt}
+    </update>
+
+    <delete id="deleteSchedule" parameterType="com.infomind.axboot.domain.schedule.Schedule">
+        DELETE FROM JNU_SCHE
+        WHERE 1=1
+          AND SEME_YEAR = #{semeYear}
+          AND SEME_SEQ = #{semeSeq}
+          AND SCHE_DT = #{scheDt}
+    </delete>
+
+</mapper>

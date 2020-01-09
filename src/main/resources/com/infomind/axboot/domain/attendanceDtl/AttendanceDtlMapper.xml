@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.attendanceDtl.AttendanceDtlMapper">
+    <select id="getMissAtdtExcel" parameterType="hashmap" resultType="com.infomind.axboot.domain.attendanceDtl.AttendanceMissExcel">
+        SELECT A.USER_CD
+             , A.USER_NM
+             , A.CLAS_NM
+             , IF(A.TCHR_DIV = 'M', '담임', '부담임') AS TCHR_DIV
+             , A.STDT_ID
+             , FN_GET_LANG('KOR', A.STDT_NM) AS STDT_NM_KOR
+             , SUM(A.ABSC_CNT) AS ABSC_CNT
+             , GROUP_CONCAT(A.ABSC_DT ORDER BY A.ABSC_DT ASC SEPARATOR ', ') AS ABSC_DT
+        FROM (
+                SELECT   U.USER_CD
+                    , U.USER_NM
+                    , U.CLAS_NM
+                    , U.CLAS_SEQ
+                    , U.TCHR_DIV
+                    , U.STDT_ID
+                    , U.STDT_NM
+                    , IF(TCHR_DIV      = 'M', AT.M_CNT, AT.S_CNT)                       AS ABSC_CNT
+                    , CAST(IF(TCHR_DIV = 'M', AT.M_ABSC_DT, AT.S_ABSC_DT) AS CHAR(200)) AS ABSC_DT
+                FROM     (SELECT CM.SEME_YEAR
+                               , CM.SEME_SEQ
+                               , CM.PERIOD_CD
+                               , CM.CLAS_SEQ
+                               , CM.CLAS_NM
+                               , IF(U.USER_CD = CM.TCHR_CD, 'M', 'S') AS TCHR_DIV
+                               , U.USER_CD
+                               , U.USER_NM
+                               , CD.STDT_ID
+                               , ST.STDT_NM
+                            FROM user_m U
+                               , jnu_clas_mst CM
+                               , jnu_clas_dtl CD
+                               , jnu_stdt ST
+                           WHERE CM.SEME_YEAR = #{schSemeYear}
+                             AND CM.SEME_SEQ  = #{schSemeSeq}
+                             AND CM.PERIOD_CD = #{schPeriodCd}
+                             AND CM.SEME_YEAR = CD.SEME_YEAR
+                             AND CM.SEME_SEQ  = CD.SEME_SEQ
+                             AND CM.PERIOD_CD = CD.PERIOD_CD
+                             AND CM.CLAS_SEQ  = CD.CLAS_SEQ
+                             AND CD.STATUS_CD = '0'
+                             AND CD.STDT_ID   = ST.STDT_ID
+                             AND U.USER_CD IN ( CM.TCHR_CD, CM.SUB_TCHR_CD )
+                ) U
+                LEFT JOIN
+                ( SELECT  AT.SEME_YEAR
+                        , AT.SEME_SEQ
+                        , AT.PERIOD_CD
+                        , AT.CLAS_SEQ
+                        , AT.STDT_ID
+                        , SUM(IF(SC.TCHR_HOUR              > M_ATDC_CNT, 1, 0))                            AS M_CNT
+                        , SUM(IF(SC.SUB_TCHR_HOUR          > S_ATDC_CNT, 1, 0))                            AS S_CNT
+                        , GROUP_CONCAT(IF(SC.TCHR_HOUR     > M_ATDC_CNT, AT.ATDC_DT, NULL) SEPARATOR ', ') AS M_ABSC_DT
+                        , GROUP_CONCAT(IF(SC.SUB_TCHR_HOUR > S_ATDC_CNT, AT.ATDC_DT, NULL) SEPARATOR ', ') AS S_ABSC_DT
+                    FROM     ( SELECT  AM.SEME_YEAR
+                                    , AM.SEME_SEQ
+                                    , AM.PERIOD_CD
+                                    , AM.CLAS_SEQ
+                                    , AM.ATDC_DT
+                                    , AD.STDT_ID
+                                    , SUM(IF(AM.TCHR_DIV = 'M' AND AD.ATDC_CD IN ('0' , '1' , '2'), 1, 0)) AS M_ATDC_CNT
+                                    , SUM(IF(AM.TCHR_DIV = 'S' AND AD.ATDC_CD IN ('0' , '1' , '2'), 1, 0)) AS S_ATDC_CNT
+                                FROM     jnu_atdc_mst AM
+                                , jnu_atdc_dtl AD
+                                WHERE    AM.SEME_YEAR = AD.SEME_YEAR
+                                AND      AM.SEME_SEQ  = AD.SEME_SEQ
+                                AND      AM.PERIOD_CD = AD.PERIOD_CD
+                                AND      AM.CLAS_SEQ  = AD.CLAS_SEQ
+                                AND      AM.ATDC_DT   = AD.ATDC_DT
+                                AND      AM.ATDC_SEQ  = AD.ATDC_SEQ
+                                AND      AM.SEME_YEAR = #{schSemeYear}
+                                AND      AM.SEME_SEQ  = #{schSemeSeq}
+                                AND      AM.PERIOD_CD = #{schPeriodCd}
+                                GROUP BY AM.SEME_YEAR, AM.SEME_SEQ, AM.PERIOD_CD, AM.CLAS_SEQ, AM.ATDC_DT, AD.STDT_ID
+                ) AT
+                LEFT OUTER JOIN
+                        ( SELECT A.*
+                                , CM.DATA1 AS TCHR_HOUR
+                                , CM.DATA2 AS SUB_TCHR_HOUR
+                        FROM    (SELECT SE.SEME_YEAR
+                                    , SE.SEME_SEQ
+                                    , DT.DT
+                                    , SC.SCHE_NM
+                                    , IF(IFNULL(SC.WEEK_CD, '') = '', CASE DT.DAY_OF_WEEK
+                                                WHEN '2' THEN MON_CD
+                                                WHEN '3' THEN TUE_CD
+                                                WHEN '4' THEN WED_CD
+                                                WHEN '5' THEN THU_CD
+                                                WHEN '6' THEN FRI_CD
+                                        END, SC.WEEK_CD) AS WEEK_CD
+                                    FROM    jnu_seme SE
+                                        , jnu_date DT
+                                        LEFT JOIN jnu_sche SC
+                                        ON      SC.SCHE_DT   = DT.DT
+                                        AND     SC.SEME_YEAR = #{schSemeYear}
+                                        AND     SC.SEME_SEQ  = #{schSemeSeq}
+                                        WHERE   SE.SEME_YEAR         = #{schSemeYear}
+                                        AND     SE.SEME_SEQ          = #{schSemeSeq}
+                                        AND     DT.DT BETWEEN SE.START_DT AND     END_DT
+                                        AND     NOT EXISTS
+                                                ( SELECT 1
+                                                FROM    jnu_sche
+                                                WHERE   SEME_YEAR = SE.SEME_YEAR
+                                                AND     SEME_SEQ  = SE.SEME_SEQ
+                                                AND     SCHE_DT   = DT.DT
+                                                AND ( HOLI_YN = 'Y' )
+                                                )
+                                        ) A
+                                        LEFT JOIN common_code_m CM
+                                        ON      CM.GROUP_CD = 'WEEK_CD'
+                                        AND     CM.CODE     = A.WEEK_CD
+                                    WHERE   A.WEEK_CD IS NOT NULL
+                                    ) SC
+                                ON       AT.SEME_YEAR = SC.SEME_YEAR
+                                AND      AT.SEME_SEQ  = SC.SEME_SEQ
+                                AND      AT.ATDC_DT   = SC.DT
+                        GROUP BY AT.SEME_YEAR, AT.SEME_SEQ, AT.PERIOD_CD, AT.CLAS_SEQ, AT.STDT_ID
+                        ) AT
+                ON       U.SEME_YEAR = AT.SEME_YEAR
+                AND      U.SEME_SEQ  = AT.SEME_SEQ
+                AND      U.PERIOD_CD = AT.PERIOD_CD
+                AND      U.CLAS_SEQ  = AT.CLAS_SEQ
+                AND      U.STDT_ID   = AT.STDT_ID
+            HAVING ABSC_DT IS NOT NULL
+
+            UNION ALL
+
+            SELECT SC.USER_CD
+                , SC.USER_NM
+                , SC.CLAS_NM
+                , SC.CLAS_SEQ
+                , SC.TCHR_DIV
+                , SC.STDT_ID
+                , SC.STDT_NM
+                , 1 AS ABSC_CNT
+                , SC.DT AS ABSC_DT
+            FROM   ( SELECT A.*
+                    FROM    (SELECT CM.*
+                            , DT.DT
+                            , IF(IFNULL(SC.WEEK_CD, '') = '', CASE DT.DAY_OF_WEEK
+                                                            WHEN '2' THEN MON_CD
+                                                            WHEN '3' THEN TUE_CD
+                                                            WHEN '4' THEN WED_CD
+                                                            WHEN '5' THEN THU_CD
+                                                            WHEN '6' THEN FRI_CD
+                                                    END, SC.WEEK_CD) AS WEEK_CD
+                            FROM    jnu_seme SE
+                                , jnu_date DT
+                                LEFT JOIN jnu_sche SC
+                                ON      SC.SCHE_DT   = DT.DT
+                                AND     SC.SEME_YEAR = #{schSemeYear}
+                                AND     SC.SEME_SEQ  = #{schSemeSeq}
+                                    , (SELECT U.USER_CD
+                                            , U.USER_NM
+                                            , CM.CLAS_NM
+                                            , CM.CLAS_SEQ
+                                            , IF(U.USER_CD = CM.TCHR_CD, 'M', 'S') AS TCHR_DIV
+                                            , CD.STDT_ID
+                                            , ST.STDT_NM
+                                        FROM    user_m U
+                                        , jnu_clas_mst CM
+                                        , jnu_clas_dtl CD
+                                        , jnu_stdt ST
+                                        WHERE   CM.SEME_YEAR = #{schSemeYear}
+                                        AND     CM.SEME_SEQ  = #{schSemeSeq}
+                                        AND     CM.PERIOD_CD = #{schPeriodCd}
+                                        AND     CM.SEME_YEAR = CD.SEME_YEAR
+                                        AND     CM.SEME_SEQ  = CD.SEME_SEQ
+                                        AND     CM.PERIOD_CD = CD.PERIOD_CD
+                                        AND     CM.CLAS_SEQ  = CD.CLAS_SEQ
+                                        AND     CD.STATUS_CD = '0'
+                                        AND     CD.STDT_ID   = ST.STDT_ID
+                                        AND     U.USER_CD IN ( CM.TCHR_CD, CM.SUB_TCHR_CD )
+                                        ) CM
+                        WHERE   SE.SEME_YEAR = #{schSemeYear}
+                        AND     SE.SEME_SEQ  = #{schSemeSeq}
+                        AND     DT.DT BETWEEN SE.START_DT AND END_DT
+                        <![CDATA[
+                        AND     DT.DT  < DATE_FORMAT(NOW(), '%Y-%m-%d')
+                        ]]>
+                        <choose>
+                            <when test='schPeriodCd.equals("R")'>
+                                AND     DT.DT >= (SELECT MAX(SCHE_DT) FROM jnu_sche WHERE SEME_YEAR = #{schSemeYear} AND SEME_SEQ = #{schSemeSeq} AND SCHE_NM = '후반기')
+                            </when>
+                            <when test='schPeriodCd.equals("F")'>
+                                <![CDATA[
+                                    AND     DT.DT < (SELECT MAX(SCHE_DT) FROM jnu_sche WHERE SEME_YEAR = #{schSemeYear} AND SEME_SEQ = #{schSemeSeq} AND SCHE_NM = '후반기')
+                                ]]>
+                            </when>
+                            <otherwise>
+                            </otherwise>
+                        </choose>
+                        AND     NOT EXISTS ( SELECT 1
+                                                FROM jnu_sche
+                                                WHERE SEME_YEAR = SE.SEME_YEAR
+                                                AND SEME_SEQ  = SE.SEME_SEQ
+                                                AND SCHE_DT   = DT.DT
+                                                AND HOLI_YN   = 'Y')
+                                            ) A
+                        LEFT JOIN common_code_m CM
+                        ON      CM.GROUP_CD = 'WEEK_CD'
+                        AND     CM.CODE     = A.WEEK_CD
+            WHERE   A.WEEK_CD IS NOT NULL
+            AND     ( (A.TCHR_DIV = 'M' AND DATA1 > 0) OR (A.TCHR_DIV = 'S' AND DATA2 > 0) )
+            ) SC
+            LEFT JOIN
+                ( SELECT DISTINCT CLAS_SEQ , TCHR_DIV , ATDC_DT
+                    FROM jnu_atdc_mst
+                    WHERE SEME_YEAR = #{schSemeYear}
+                    AND SEME_SEQ  = #{schSemeSeq}
+                    AND PERIOD_CD = #{schPeriodCd}
+                ) AM
+            ON     SC.DT       = AM.ATDC_DT
+            AND    SC.CLAS_SEQ = AM.CLAS_SEQ
+            AND    SC.TCHR_DIV = AM.TCHR_DIV
+            WHERE  AM.ATDC_DT IS NULL
+            ) A
+        GROUP BY USER_CD, USER_NM, CLAS_NM, CLAS_SEQ, TCHR_DIV, STDT_ID, STDT_NM
+        ORDER BY USER_NM, ABSC_DT
+    </select>
+
+    <select id="getAtdcDtl" parameterType="hashmap" resultType="com.infomind.axboot.domain.attendanceDtl.AttendanceDtl">
+        SELECT
+            A.SEME_YEAR,
+            A.SEME_SEQ,
+            A.PERIOD_CD,
+            A.CLAS_SEQ,
+            A.ATDC_DT,
+            A.ATDC_SEQ,
+            A.STDT_ID,
+            A.ATDC_CD,
+            A.ATDC_REASON,
+            A.CREATED_AT,
+            A.CREATED_BY,
+            A.UPDATED_AT,
+            A.UPDATED_BY
+        FROM JNU_ATDC_DTL A
+        WHERE
+          1=1
+        <if test='!semeYear.equals("")'>
+            AND A.SEME_YEAR =  #{semeYear}
+        </if>
+        <if test='!semeSeq.equals("")'>
+            AND A.SEME_SEQ =  #{semeSeq}
+        </if>
+        <if test='!periodCd.equals("")'>
+            AND A.PERIOD_CD =  #{periodCd}
+        </if>
+        <if test='!clasSeq.equals("")'>
+            AND A.CLAS_SEQ =  #{clasSeq}
+        </if>
+        <if test='!atdcSeq.equals("")'>
+            AND A.ATDC_SEQ =#{atdcSeq}
+        </if>
+    </select>
+
+
+    <delete id="deleteAtdcDtl" parameterType="com.infomind.axboot.domain.attendanceDtl.AttendanceDtl">
+        DELETE FROM JNU_ATDC_DTL
+          WHERE
+            SEME_YEAR =  #{semeYear}
+            AND SEME_SEQ = #{semeSeq}
+            AND PERIOD_CD =  #{periodCd}
+            AND CLAS_SEQ =  #{clasSeq}
+            AND ATDC_DT =#{atdcDt}
+            AND ATDC_SEQ =#{atdcSeq}
+    </delete>
+
+    <select id="viewList" parameterType="hashmap" resultType="com.infomind.axboot.domain.attendanceDtl.AttendanceView">
+        SELECT *
+        FROM ( SELECT CD.STDT_ID
+                    , LP.KOR AS STDT_NM_KOR
+                    , LP.ENG AS STDT_NM_ENG
+                    , FN_CODE_NM('NATN_CD', ST.NATN_CD) AS NATN_NM
+                    , FN_CODE_NM('GENDER', ST.GENDER) AS GENDER_NM
+                    , ST.BIRTH_DT
+               FROM jnu_clas_mst CM
+                  , jnu_clas_dtl CD
+                        LEFT JOIN jnu_stdt ST
+                                  ON CD.STDT_ID = ST.STDT_ID
+                        LEFT JOIN jnu_lang_pack LP
+                                  ON ST.STDT_NM = LP.LANG_KEY
+               WHERE CM.SEME_YEAR = CD.SEME_YEAR
+                 AND CM.SEME_SEQ = CD.SEME_SEQ
+                 AND CM.PERIOD_CD = CD.PERIOD_CD
+                 AND CM.CLAS_SEQ = CD.CLAS_SEQ
+                 AND CD.STATUS_CD = '0'
+                 AND CM.SEME_YEAR = #{schSemeYear}
+                 AND CM.SEME_SEQ = #{schSemeSeq}
+                 AND CM.PERIOD_CD = #{schPeriodCd}
+                 AND CM.CLAS_SEQ = #{schClasSeq}
+             ) CL
+                 LEFT JOIN
+             (  SELECT AT.STDT_ID
+                     , AT.TCHR_DIV_NM
+                     , MAX( IF(AT.ATDC_DT = D0, AT.ATDC, NULL)) AS D0
+                     , MAX( IF(AT.ATDC_DT = D1, AT.ATDC, NULL)) AS D1
+                     , MAX( IF(AT.ATDC_DT = D2, AT.ATDC, NULL)) AS D2
+                     , MAX( IF(AT.ATDC_DT = D3, AT.ATDC, NULL)) AS D3
+                     , MAX( IF(AT.ATDC_DT = D4, AT.ATDC, NULL)) AS D4
+                     , MAX( IF(AT.ATDC_DT = D5, AT.ATDC, NULL)) AS D5
+                     , MAX( IF(AT.ATDC_DT = D6, AT.ATDC, NULL)) AS D6
+                     , MAX( IF(AT.ATDC_DT = D7, AT.ATDC, NULL)) AS D7
+                     , MAX( IF(AT.ATDC_DT = D8, AT.ATDC, NULL)) AS D8
+                     , MAX( IF(AT.ATDC_DT = D9, AT.ATDC, NULL)) AS D9
+                     , MAX( IF(AT.ATDC_DT = D10, AT.ATDC, NULL)) AS D10
+                     , MAX( IF(AT.ATDC_DT = D11, AT.ATDC, NULL)) AS D11
+                     , MAX( IF(AT.ATDC_DT = D12, AT.ATDC, NULL)) AS D12
+                     , MAX( IF(AT.ATDC_DT = D13, AT.ATDC, NULL)) AS D13
+                     , MAX( IF(AT.ATDC_DT = D14, AT.ATDC, NULL)) AS D14
+                FROM (  SELECT AM.SEME_YEAR
+                             , AM.SEME_SEQ
+                             , AM.PERIOD_CD
+                             , AM.CLAS_SEQ
+                             , AM.ATDC_DT
+                             , AD.STDT_ID
+                             , FN_CODE_NM('TCHR_DIV', AM.TCHR_DIV) AS TCHR_DIV_NM
+                             , CONCAT( SUM(IF(AD.ATDC_CD = '0', 1, 0)), ' / ', SUM(IF(AD.ATDC_CD = '1', 1, 0)), ' / ', SUM(IF(AD.ATDC_CD = '2', 1, 0)) ) AS ATDC
+                        FROM jnu_atdc_mst AM
+                           , jnu_atdc_dtl AD
+                        WHERE AM.SEME_YEAR = AD.SEME_YEAR
+                          AND AM.SEME_SEQ = AD.SEME_SEQ
+                          AND AM.PERIOD_CD = AD.PERIOD_CD
+                          AND AM.CLAS_SEQ = AD.CLAS_SEQ
+                          AND AM.ATDC_DT = AD.ATDC_DT
+                          AND AM.ATDC_SEQ = AD.ATDC_SEQ
+                          AND AM.SEME_YEAR = #{schSemeYear}
+                          AND AM.SEME_SEQ = #{schSemeSeq}
+                          AND AM.PERIOD_CD = #{schPeriodCd}
+                          AND AM.CLAS_SEQ = #{schClasSeq}
+                          AND AM.ATDC_DT IN
+                              ( SELECT DT
+                                FROM jnu_date
+                                WHERE DT BETWEEN DATE_ADD(#{schDate}, INTERVAL -14 DAY) AND #{schDate}
+                              )
+                        GROUP BY AM.SEME_YEAR
+                               , AM.SEME_SEQ
+                               , AM.PERIOD_CD
+                               , AM.CLAS_SEQ
+                               , AM.ATDC_DT
+                               , AD.STDT_ID
+                               , AM.TCHR_DIV
+                ) AT
+                   , (
+                    <include refid="date"/>
+                ) DT
+                GROUP BY AT.STDT_ID, AT.TCHR_DIV_NM
+             ) AT
+             ON CL.STDT_ID = AT.STDT_ID
+            LEFT JOIN (
+                        SELECT AM.SEME_YEAR
+                             , AM.SEME_SEQ
+                             , AD.STDT_ID
+                             , TRIM(TRUNCATE(SUM(IF(AM.PERIOD_CD = 'F' AND AD.ATDC_CD = '1', 1, 0))/3, 1) + SUM(IF(AM.PERIOD_CD = 'F' AND AD.ATDC_CD = '2', 1, 0))) + 0 AS F_ABSC
+                             , TRIM(TRUNCATE(SUM(IF(AM.PERIOD_CD = 'R' AND AD.ATDC_CD = '1', 1, 0))/3, 1) + SUM(IF(AM.PERIOD_CD = 'R' AND AD.ATDC_CD = '2', 1, 0))) + 0 AS R_ABSC
+                        FROM jnu_atdc_mst AM
+                           , jnu_atdc_dtl AD
+                        WHERE AM.SEME_YEAR = AD.SEME_YEAR
+                          AND AM.SEME_SEQ = AD.SEME_SEQ
+                          AND AM.PERIOD_CD = AD.PERIOD_CD
+                          AND AM.CLAS_SEQ = AD.CLAS_SEQ
+                          AND AM.ATDC_DT = AD.ATDC_DT
+                          AND AM.ATDC_SEQ = AD.ATDC_SEQ
+                          AND AM.SEME_YEAR = #{schSemeYear}
+                          AND AM.SEME_SEQ = #{schSemeSeq}
+                        GROUP BY AM.SEME_YEAR, AM.SEME_SEQ, AD.STDT_ID
+            ) ABSC
+            ON CL.STDT_ID = ABSC.STDT_ID
+        ORDER BY CL.STDT_ID, AT.TCHR_DIV_NM
+    </select>
+
+    <select id="dateList" parameterType="hashmap" resultType="com.infomind.axboot.domain.attendanceDtl.AttendanceView">
+        SELECT CONCAT(DATE_FORMAT(D0, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D0), 1), ')') AS D0
+             , CONCAT(DATE_FORMAT(D1, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D1), 1), ')') AS D1
+             , CONCAT(DATE_FORMAT(D2, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D2), 1), ')') AS D2
+             , CONCAT(DATE_FORMAT(D3, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D3), 1), ')') AS D3
+             , CONCAT(DATE_FORMAT(D4, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D4), 1), ')') AS D4
+             , CONCAT(DATE_FORMAT(D5, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D5), 1), ')') AS D5
+             , CONCAT(DATE_FORMAT(D6, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D6), 1), ')') AS D6
+             , CONCAT(DATE_FORMAT(D7, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D7), 1), ')') AS D7
+             , CONCAT(DATE_FORMAT(D8, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D8), 1), ')') AS D8
+             , CONCAT(DATE_FORMAT(D9, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D9), 1), ')') AS D9
+             , CONCAT(DATE_FORMAT(D10, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D10), 1), ')') AS D10
+             , CONCAT(DATE_FORMAT(D11, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D11), 1), ')') AS D11
+             , CONCAT(DATE_FORMAT(D12, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D12), 1), ')') AS D12
+             , CONCAT(DATE_FORMAT(D13, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D13), 1), ')') AS D13
+             , CONCAT(DATE_FORMAT(D14, '%m-%d'), ' (', SUBSTR('일월화수목금토', DAYOFWEEK(D14), 1), ')') AS D14
+        FROM (
+                <include refid="date"/>
+             ) A
+    </select>
+
+    <sql id="date">
+        SELECT MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL 0 DAY), DT, NULL)) AS D0
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -1 DAY), DT, NULL)) AS D1
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -2 DAY), DT, NULL)) AS D2
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -3 DAY), DT, NULL)) AS D3
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -4 DAY), DT, NULL)) AS D4
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -5 DAY), DT, NULL)) AS D5
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -6 DAY), DT, NULL)) AS D6
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -7 DAY), DT, NULL)) AS D7
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -8 DAY), DT, NULL)) AS D8
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -9 DAY), DT, NULL)) AS D9
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -10 DAY), DT, NULL)) AS D10
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -11 DAY), DT, NULL)) AS D11
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -12 DAY), DT, NULL)) AS D12
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -13 DAY), DT, NULL)) AS D13
+             , MAX(IF(DT = DATE_ADD(#{schDate}, INTERVAL -14 DAY), DT, NULL)) AS D14
+        FROM jnu_date
+        WHERE DT BETWEEN DATE_ADD(#{schDate}, INTERVAL -14 DAY) AND #{schDate}
+    </sql>
+
+
+</mapper>

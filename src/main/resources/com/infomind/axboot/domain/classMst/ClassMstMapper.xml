@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.classMst.ClassMstMapper">
+
+    <select id="getClassList" parameterType="hashmap" resultType="com.infomind.axboot.domain.classMst.ClassMst">
+        SELECT
+            A.CLAS_SEQ,
+            A.SEME_YEAR,
+            A.SEME_SEQ,
+            A.PERIOD_CD,
+            FN_CODE_NM('PERIOD_CD', A.PERIOD_CD) AS PERIOD_NM,
+            A.CLAS_CD,
+            A.CLAS_NM,
+            CONCAT(A.SEME_YEAR, '-', FN_CODE_NM('SEME_CD', B.SEME_CD)) AS SEME_NM,
+            FN_GET_LANG('KOR',B.CORS_NM) AS CORS_NM,
+            (SELECT COUNT(C.CLAS_SEQ) FROM JNU_CLAS_DTL C WHERE C.CLAS_SEQ = A.CLAS_SEQ AND C.STATUS_CD = '0') AS STDT_CNT,
+           /* COUNT(C.*) AS S_CNT,*/
+            (SELECT USER_NM FROM USER_M WHERE USER_CD = A.TCHR_CD) AS TCHR_NM,
+            (SELECT USER_NM FROM USER_M WHERE USER_CD = A.SUB_TCHR_CD) AS SUB_TCHR_NM,
+            A.LV,
+            A.TCHR_CD,
+            A.SUB_TCHR_CD,
+            A.LCTR_ROOM,
+            A.CREATED_AT,
+            A.CREATED_BY,
+            A.UPDATED_AT,
+            A.UPDATED_BY
+        FROM JNU_CLAS_MST A , JNU_SEME B
+        WHERE A.SEME_SEQ = B.SEME_SEQ
+          AND A.SEME_YEAR = B.SEME_YEAR
+         <if test='!semeYear.equals("")'>
+           AND A.SEME_YEAR =  #{semeYear}
+         </if>
+        <if test='!semeSeq.equals("")'>
+            AND A.SEME_SEQ =  #{semeSeq}
+        </if>
+        <if test='!periodCd.equals("")'>
+            AND A.PERIOD_CD =  #{periodCd}
+        </if>
+        ORDER BY A.SEME_YEAR DESC, A.SEME_SEQ, A.PERIOD_CD,A.LV,A.CLAS_NM
+    </select>
+
+   <insert id="insertClassMst" parameterType="com.infomind.axboot.domain.classMst.ClassMst" >
+        INSERT INTO JNU_CLAS_MST(
+        SEME_YEAR,
+        SEME_SEQ,
+        PERIOD_CD,
+        CLAS_NM,
+        CLAS_CD,
+        LV,
+        TCHR_CD,
+        SUB_TCHR_CD,
+        LCTR_ROOM,
+        CREATED_AT,
+        CREATED_BY
+        )VALUES(
+          #{semeYear},
+          #{semeSeq},
+          #{periodCd},
+          #{clasNm},
+          #{clasCd},
+          #{lv},
+          #{tchrCd},
+          #{subTchrCd},
+          #{lctrRoom},
+          now() ,
+         #{createdBy}
+        )
+
+    </insert>
+
+    <update id="updateClassMst" parameterType="com.infomind.axboot.domain.classMst.ClassMst" >
+        UPDATE JNU_CLAS_MST SET
+            SEME_YEAR = #{semeYear},
+            SEME_SEQ = #{semeSeq},
+            PERIOD_CD =#{periodCd},
+            CLAS_NM = #{clasNm},
+            CLAS_CD = #{clasCd},
+            LV = #{lv},
+            TCHR_CD = #{tchrCd},
+            SUB_TCHR_CD = #{subTchrCd},
+            LCTR_ROOM = #{lctrRoom},
+            UPDATED_AT = now(),
+            UPDATED_BY = #{updatedBy}
+        WHERE 1=1
+          AND SEME_YEAR = #{semeYear}
+          AND SEME_SEQ = #{semeSeq}
+          AND CLAS_SEQ = #{clasSeq}
+
+    </update>
+
+    <select id="getPeriodCombo" parameterType="map" resultType="map">
+        SELECT DISTINCT
+                PERIOD_CD,
+                FN_CODE_NM('PERIOD_CD', PERIOD_CD) AS NM
+        FROM JNU_CLAS_MST
+        WHERE SEME_YEAR = #{schSemeYear}
+          AND SEME_SEQ = #{schSemeSeq}
+        <if test='schMyClasChk.equals("true")'>
+            AND (TCHR_CD = #{userCd} OR SUB_TCHR_CD = #{userCd}))
+        </if>
+        ORDER BY PERIOD_CD DESC
+    </select>
+
+    <select id="getClasSeqCombo" parameterType="map" resultType="map">
+        SELECT CLAS_SEQ,
+               CLAS_NM
+        FROM JNU_CLAS_MST
+        WHERE SEME_YEAR = #{schSemeYear}
+          AND SEME_SEQ = #{schSemeSeq}
+          AND PERIOD_CD = #{schPeriodCd}
+        <if test='schMyClasChk.equals("true")'>
+          AND ( TCHR_CD = #{userCd} OR SUB_TCHR_CD = #{userCd} )
+        </if>
+        ORDER BY CLAS_NM
+    </select>
+
+    <select id="getClassGrouping" parameterType="hashmap" resultType="com.infomind.axboot.domain.classMst.ClassMst">
+        SELECT
+            CM.CLAS_SEQ,
+            CM.CLAS_NM,
+            CM.LV,
+            CM.LCTR_ROOM,
+            FN_GET_LANG('KOR',B.CORS_NM) AS CORS_NM,
+            FN_USER_NM(CM.TCHR_CD) AS TCHR_NM,
+            FN_USER_NM(CM.SUB_TCHR_CD) AS SUB_TCHR_NM,
+            GROUP_CONCAT(FN_GET_LANG('KOR', ST.STDT_NM) SEPARATOR '|') AS STDT_LIST,
+            FN_CODE_NM('PERIOD_CD', CM.PERIOD_CD) AS PERIOD_NM,
+            COUNT(*) AS STDT_CNT
+        FROM  jnu_clas_mst CM,
+               jnu_seme B,
+               jnu_clas_dtl CD
+         LEFT JOIN JNU_STDT ST
+                 ON CD.STDT_ID = ST.STDT_ID
+        WHERE  CM.SEME_YEAR = CD.SEME_YEAR
+          AND CM.SEME_SEQ = CD.SEME_SEQ
+          AND CM.SEME_YEAR = B.SEME_YEAR
+          AND CM.SEME_SEQ = B.SEME_SEQ
+          AND CM.PERIOD_CD = CD.PERIOD_CD
+          AND CM.CLAS_SEQ = CD.CLAS_SEQ
+          AND CM.SEME_YEAR = #{semeYear}
+          AND CM.SEME_SEQ = #{semeSeq}
+          AND CM.PERIOD_CD = #{periodCd}
+          AND CD.STATUS_CD = '0'
+        GROUP BY CM.CLAS_SEQ,
+                 CM.CLAS_NM,
+                 CM.LV,
+                 CM.LCTR_ROOM,
+                 CM.TCHR_CD,
+                 CM.SUB_TCHR_CD
+        ORDER BY CM.LV, CM.CLAS_NM
+    </select>
+
+    <select id="getClassMaxCount" parameterType="hashmap" resultType="int">
+      SELECT IFNULL(MAX(CNT), 0) AS CNT
+      FROM (  SELECT COUNT(CLAS_SEQ) AS CNT
+                FROM JNU_CLAS_DTL
+               WHERE SEME_YEAR = #{semeYear}
+                 AND SEME_SEQ = #{semeSeq}
+                 AND PERIOD_CD = #{periodCd}
+               GROUP BY CLAS_SEQ
+           ) A
+    </select>
+
+    <delete id="deleteClassMst" parameterType="com.infomind.axboot.domain.classMst.ClassMst" >
+        DELETE FROM JNU_CLAS_MST WHERE CLAS_SEQ = #{clasSeq} AND SEME_YEAR = #{semeYear} AND SEME_SEQ = #{semeSeq} AND PERIOD_CD = #{periodCd}
+    </delete>
+</mapper>

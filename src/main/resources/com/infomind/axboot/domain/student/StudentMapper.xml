@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.student.StudentMapper">
+
+    <select id="getStudentList" parameterType="hashmap" resultType="com.infomind.axboot.domain.student.Student">
+        SELECT A.*
+            , B.KOR AS STDT_NM_KOR
+            , B.ENG AS STDT_NM_ENG
+            , B.CHN AS STDT_NM_CHN
+            , B.LANG_KEY
+            , FN_CODE_NM('NATN_CD', A.NATN_CD) AS NATN_NM
+            , FN_CODE_NM('GENDER', A.GENDER) AS GENDER_NM
+        FROM JNU_STDT A
+        LEFT JOIN JNU_LANG_PACK B
+        ON A.STDT_NM = B.LANG_KEY
+        WHERE 1 = 1
+        <choose>
+            <when test='isClassMgmt != null and isClassMgmt.equals("Y")'>
+                AND NOT EXISTS (SELECT 1
+                FROM jnu_clas_dtl CD
+                WHERE CD.SEME_YEAR =#{schSemeYear}
+                AND CD.SEME_SEQ = #{schSemeSeq}
+                AND CD.PERIOD_CD = #{schPeriodCd}
+                AND CD.STDT_ID = A.STDT_ID)
+            </when>
+            <otherwise>
+                <if test='schSemeYear != null and !schSemeYear.equals("")'>
+                    AND A.STDT_ID IN
+                        (SELECT STDT_ID
+                        FROM jnu_clas_dtl CD
+                        WHERE CD.SEME_YEAR = #{schSemeYear}
+                        <if test='schSemeSeq != null and !schSemeSeq.equals("")'>
+                        AND CD.SEME_SEQ = #{schSemeSeq}
+                        </if>
+                        <if test='schPeriodCd != null and !schPeriodCd.equals("")'>
+                            AND CD.PERIOD_CD = #{schPeriodCd}
+                        </if>
+                        )
+                </if>
+            </otherwise>
+        </choose>
+         <if test='!stdtId.equals("")'>
+           AND A.STDT_ID =  #{stdtId}
+         </if>
+        <if test='!useYn.equals("")'>
+            AND A.USE_YN =  #{useYn}
+        </if>
+        <if test='!schStdt.equals("")'>
+            AND (A.STDT_ID  LIKE  CONCAT('%',#{schStdt},'%') OR B.KOR  LIKE  CONCAT('%',#{schStdt},'%') OR B.ENG  LIKE  CONCAT('%',#{schStdt},'%'))
+        </if>
+    </select>
+
+
+    <select id="getCounStudentList" parameterType="hashmap" resultType="com.infomind.axboot.domain.student.Student">
+        SELECT
+            A.STDT_ID,
+            B.KOR AS STDT_NM_KOR,
+            B.ENG AS STDT_NM_ENG,
+            A.STDT_NM,
+            A.NATN_CD,
+            FN_CODE_NM('NATN_CD', A.NATN_CD) AS NATN_NM,
+            A.BIRTH_DT,
+            DATE_FORMAT(A.BIRTH_DT, '%Y.%m') AS BIRTH_MT,
+            A.GENDER,
+            FN_CODE_NM('GENDER', A.GENDER) AS GENDER_NM,
+            A.HP_NO,
+            A.EMAIL,
+            A.USE_YN,
+            CO.COUN_DT,
+            FN_CODE_NM('COUN_CD',CO.COUN_CD) AS COUN_NM,
+            CO.CONTENTS,
+            CO.CREATED_BY,
+            FN_USER_NM(CO.CREATED_BY) AS CREATED_BY_NM
+        FROM
+            JNU_STDT A
+        LEFT JOIN
+            JNU_LANG_PACK B
+                ON A.STDT_NM = B.LANG_KEY
+            ,JNU_COUN CO
+        WHERE
+            1=1
+            AND A.STDT_ID = CO.STDT_ID
+            AND CO.DEL_YN = 'N'
+        <if test='!schSemeYear.equals("")'>
+            AND CO.SEME_YEAR =  #{schSemeYear}
+        </if>
+        <if test='!schSemeSeq.equals("")'>
+            AND CO.SEME_SEQ =  #{schSemeSeq}
+        </if>
+        <if test='!schPeriodCd.equals("")'>
+            AND CO.PERIOD_CD =  #{schPeriodCd}
+        </if>
+        <if test='!schClasSeq.equals("")'>
+            AND CO.CLAS_SEQ =  #{schClasSeq}
+        </if>
+        <if test='!openYn.equals("")'>
+            AND CO.OPEN_YN =  #{openYn}
+        </if>
+        <if test='!schStdt.equals("")'>
+            AND (A.STDT_ID  LIKE  CONCAT('%',#{schStdt},'%') OR B.KOR  LIKE  CONCAT('%',#{schStdt},'%') OR B.ENG  LIKE  CONCAT('%',#{schStdt},'%'))
+        </if>
+        <if test='!schTchr.equals("")'>
+            AND (CO.CREATED_BY = #{schTchr} OR CO.CREATED_BY IN (SELECT USER_CD FROM USER_M WHERE USER_NM LIKE CONCAT('%',#{schTchr},'%')))
+        </if>
+    </select>
+
+</mapper>

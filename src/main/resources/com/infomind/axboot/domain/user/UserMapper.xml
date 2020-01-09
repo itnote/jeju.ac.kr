@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.user.UserMapper">
+
+
+    <select id="getUserList" parameterType="hashmap" resultType="com.infomind.axboot.domain.user.User">
+        SELECT
+            A.USER_CD,
+            A.USER_NM,
+            A.EMAIL,
+            A.HP_NO,
+            B.ROLE_CD,
+            A.REMARK,
+            A.USER_STATUS,
+            A.LOCALE,
+            A.MENU_GRP_CD
+          FROM USER_M A, USER_ROLE_M B
+         WHERE 1=1
+         AND A.USER_CD = B.USER_CD
+         AND A.USE_YN =  'Y'
+         <if test='!roleCd.equals("")'>
+           AND B.ROLE_CD =  #{roleCd}
+         </if>
+        <if test='!userNm.equals("")'>
+            AND (A.USER_NM  LIKE  CONCAT('%',#{userNm},'%') OR A.USER_CD  LIKE  CONCAT('%',#{userNm},'%'))
+        </if>
+    </select>
+
+
+</mapper>

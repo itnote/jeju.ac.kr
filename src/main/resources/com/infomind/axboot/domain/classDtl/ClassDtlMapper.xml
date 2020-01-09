@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.infomind.axboot.domain.classDtl.ClassDtlMapper">
+
+    <select id="getClassStudentList" parameterType="hashmap" resultType="com.infomind.axboot.domain.classDtl.ClassDtl">
+        SELECT
+            A.SEME_YEAR,
+            A.SEME_SEQ,
+            A.PERIOD_CD,
+            FN_CODE_NM('PERIOD_CD', A.PERIOD_CD) AS PERIOD_NM,
+            B.BIRTH_DT,
+            FN_CODE_NM('GENDER', B.GENDER) AS GENDER_NM,
+            A.CLAS_SEQ,
+            A.STDT_ID,
+            FN_CODE_NM('NATN_CD', B.NATN_CD) AS NATN_NM,
+            C.KOR AS STDT_NM,
+            C.ENG AS STDT_NM_ENG,
+            FN_CODE_NM('STATUS_CD', A.STATUS_CD) AS STATUS_NM,
+            M.CLAS_NM,
+            M.LV,
+            FN_USER_NM(M.TCHR_CD) AS TCHR_NM,
+            FN_USER_NM(M.SUB_TCHR_CD) AS SUB_TCHR_NM,
+            FN_GET_LANG('KOR',S.CORS_NM) AS CORS_NM,
+            A.STATUS_CD,
+            A.FRESH_YN,
+            A.DORM_PAY_YN,
+            A.APP_PAY_YN,
+            A.INS_PAY_YN,
+            A.BED_PAY_YN,
+            A.PRE_PAY_YN,
+            A.DISC_CD,
+            A.FEE_DT,
+            A.FEE_AMT,
+            A.DORM_AMT,
+            A.GENERAL_REVIEW,
+            A.CREATED_AT,
+            A.CREATED_BY,
+            A.UPDATED_AT,
+            A.UPDATED_BY
+        FROM JNU_CLAS_DTL A LEFT JOIN JNU_STDT B
+        ON A.STDT_ID = B.STDT_ID
+        LEFT JOIN JNU_LANG_PACK C
+        ON B.STDT_NM = C.LANG_KEY
+        LEFT JOIN JNU_CLAS_MST M
+        ON A.CLAS_SEQ = M.CLAS_SEQ AND A.SEME_YEAR = M.SEME_YEAR AND A.SEME_SEQ = M.SEME_SEQ AND A.PERIOD_CD = M.PERIOD_CD
+        LEFT JOIN JNU_SEME S
+        ON  S.SEME_SEQ = A.SEME_SEQ AND S.SEME_YEAR=A.SEME_YEAR
+        WHERE
+          1=1
+        <if test='!clasSeq.equals("")'>
+            AND A.CLAS_SEQ =  #{clasSeq}
+        </if>
+        <if test='!schInput.equals("")'>
+            AND (A.STDT_ID  LIKE  CONCAT('%',#{schInput},'%') OR C.KOR LIKE  CONCAT('%',#{schInput},'%') OR C.ENG  LIKE  CONCAT('%',#{schInput},'%'))
+        </if>
+        <if test='!stdtId.equals("")'>
+            AND A.STDT_ID  =#{stdtId}
+        </if>
+
+    </select>
+
+    <select id="getExcelClassStudentList" parameterType="hashmap" resultType="com.infomind.axboot.domain.classDtl.ClassDtl">
+        SELECT
+            B.BIRTH_DT,
+            FN_CODE_NM('GENDER', B.GENDER) AS GENDER_NM,
+            A.STDT_ID,
+            FN_CODE_NM('NATN_CD', B.NATN_CD) AS NATN_NM,
+            C.KOR AS STDT_NM,
+            C.ENG AS STDT_NM_ENG,
+            C.CHN AS STDT_NM_CHN,
+            FN_CODE_NM('STATUS_CD', A.STATUS_CD) AS STATUS_NM,
+            M.CLAS_NM,
+            A.STATUS_CD,
+            B.HP_NO
+        FROM JNU_CLAS_DTL A LEFT JOIN JNU_STDT B
+        ON A.STDT_ID = B.STDT_ID
+        LEFT JOIN JNU_LANG_PACK C
+        ON B.STDT_NM = C.LANG_KEY
+        LEFT JOIN JNU_CLAS_MST M
+        ON A.CLAS_SEQ = M.CLAS_SEQ AND A.SEME_YEAR = M.SEME_YEAR AND A.SEME_SEQ = M.SEME_SEQ AND A.PERIOD_CD = M.PERIOD_CD
+        <if test='!schSemeYear.equals("")'>
+        WHERE A.SEME_YEAR = #{schSemeYear}
+        AND A.SEME_SEQ = #{schSemeSeq}
+        AND A.PERIOD_CD = #{schPeriodCd}
+        </if>
+    </select>
+
+    <select id="getClasDtlList" parameterType="hashmap" resultType="com.infomind.axboot.domain.classDtl.ClassDtl">
+        SELECT C.STDT_ID
+        , B.KOR AS STDT_NM_KOR
+        , B.ENG AS STDT_NM_ENG
+        , C.STDT_NM
+        , C.NATN_CD
+        , FN_CODE_NM('NATN_CD', C.NATN_CD) AS NATN_NM
+        , C.BIRTH_DT
+        , DATE_FORMAT(C.BIRTH_DT, '%Y.%m') AS BIRTH_MT
+        , C.GENDER
+        , FN_CODE_NM('GENDER', C.GENDER) AS GENDER_NM
+        , C.HP_NO
+        , C.EMAIL
+        , C.USE_YN
+        , A.SEME_YEAR
+        , A.SEME_SEQ
+        , A.PERIOD_CD
+        , A.CLAS_SEQ
+        , A.CREATED_AT
+        , A.CREATED_BY
+        , A.UPDATED_AT
+        , A.UPDATED_BY
+        FROM JNU_CLAS_DTL A
+        LEFT JOIN JNU_STDT C
+        ON A.STDT_ID = C.STDT_ID
+        LEFT JOIN JNU_LANG_PACK B
+        ON C.STDT_NM = B.LANG_KEY
+        WHERE 1 = 1
+            AND A.STATUS_CD = 0
+        <if test='!schSemeYear.equals("")'>
+            AND A.SEME_YEAR =  #{schSemeYear}
+        </if>
+        <if test='!schSemeSeq.equals("")'>
+            AND A.SEME_SEQ =  #{schSemeSeq}
+        </if>
+        <if test='!schPeriodCd.equals("")'>
+            AND A.PERIOD_CD =  #{schPeriodCd}
+        </if>
+        <if test='!schClasSeq.equals("")'>
+            AND A.CLAS_SEQ =  #{schClasSeq}
+        </if>
+    </select>
+
+    <select id="getAtdcDtl" parameterType="hashmap" resultType="com.infomind.axboot.domain.classDtl.ClassDtl">
+        SELECT  FN_GET_LANG('KOR',C.STDT_NM) AS STDT_NM_KOR,
+                FN_GET_LANG('ENG',C.STDT_NM) AS STDT_NM_ENG,
+                FN_CODE_NM('NATN_CD', C.NATN_CD) AS NATN_CD,
+                C.BIRTH_DT,
+                FN_CODE_NM('GENDER', C.GENDER) AS GENDER,
+                C.HP_NO,
+                B.SEME_YEAR,
+                B.SEME_SEQ,
+                B.PERIOD_CD,
+                B.CLAS_SEQ,
+                B.STDT_ID,
+                A.ATDC_DT,
+                A.ATDC_SEQ,
+                A.ATDC_CD,
+                FN_CODE_NM('ATDC_CD', A.ATDC_CD) AS ATDC_NM,
+                A.ATDC_REASON,
+                FN_CODE_NM('ATDC_REASON', A.ATDC_REASON) AS ATDC_REASON_NM,
+                A.CREATED_AT,
+                A.CREATED_BY,
+                A.UPDATED_AT,
+                A.UPDATED_BY
+        FROM JNU_CLAS_DTL B
+            LEFT  JOIN JNU_STDT C
+                    ON B.STDT_ID =C.STDT_ID
+            LEFT OUTER JOIN JNU_ATDC_DTL A
+                    ON A.STDT_ID = B.STDT_ID
+                   AND A.SEME_YEAR = B.SEME_YEAR
+                   AND A.SEME_SEQ = B.SEME_SEQ
+                   AND A.PERIOD_CD = B.PERIOD_CD
+                   AND A.CLAS_SEQ = B.CLAS_SEQ
+                <if test='!atdcSeq.equals("")'>
+                   AND A.ATDC_SEQ =#{atdcSeq}
+                </if>
+                <if test='!atdcDt.equals("")'>
+                   AND A.ATDC_DT =#{atdcDt}
+                </if>
+        WHERE B.STATUS_CD = '0'
+        <if test='!semeYear.equals("")'>
+          AND B.SEME_YEAR =  #{semeYear}
+        </if>
+        <if test='!semeSeq.equals("")'>
+          AND B.SEME_SEQ =  #{semeSeq}
+        </if>
+        <if test='!periodCd.equals("")'>
+          AND B.PERIOD_CD =  #{periodCd}
+        </if>
+        <if test='!clasSeq.equals("")'>
+          AND B.CLAS_SEQ =  #{clasSeq}
+        </if>
+        ORDER BY STDT_NM_KOR
+    </select>
+
+    <select id="isClasStdtExist" parameterType="hashmap" resultType="int">
+        SELECT COUNT(*)
+          FROM jnu_stdt A
+         WHERE A.USE_YN = 'Y'
+           AND NOT EXISTS
+               (SELECT 1
+                  FROM jnu_clas_dtl
+                      WHERE SEME_YEAR = #{semeYear}
+                          AND SEME_SEQ = #{semeSeq}
+                          AND PERIOD_CD = #{periodCd}
+                          AND CLAS_SEQ != #{clasSeq}
+                          AND STDT_ID   = A.STDT_ID
+               )
+           AND A.STDT_ID = #{stdtId}
+    </select>
+
+</mapper>
